@@ -43,6 +43,14 @@ BEGIN
             || 'Team: ' || roster_record.teamname || CHR(10)
         );
     END LOOP;
+
+EXCEPTIONS
+    WHEN NO_DATA_FOUND THEN
+        p_error_code := 1;
+    WHEN VALUE_ERROR THEN
+        p_error_code := -3;
+    WHEN OTHERS THEN
+        p_error_code := -4;
 END;
 /
 
