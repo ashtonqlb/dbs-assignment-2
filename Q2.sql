@@ -5,9 +5,12 @@
     called spTableNameSelectAll that outputs the contents of the table to the script window 
     (using DBMS_OUTPUT) for the standard SELECT * FROM <tablename> statement.   */
 
+
 -- DIVS
 CREATE OR REPLACE PROCEDURE spdivsselectall IS
 BEGIN
+    dbms_output.put_line('DivID DivName IsActive IsDefault DisplayOrder');
+    dbms_output.put_line('----- ------- -------- --------- ------------');
     FOR i IN (
         SELECT
             *
@@ -22,6 +25,8 @@ END;
 -- GAMES
 CREATE OR REPLACE PROCEDURE spgamesselectall IS
 BEGIN
+    dbms_output.put_line('GameID DivID GameNum GameDateTime HomeTeam HomeScore VisitTeam VisitScore LocationID IsPlayed Notes');
+    dbms_output.put_line('------ ----- -------- ----------- -------- --------- --------- ---------- -------- -----');
     FOR i IN (
         SELECT
             *
@@ -36,6 +41,8 @@ END;
 -- GOALSCORERS
 CREATE OR REPLACE PROCEDURE spgoalscorersselectall IS
 BEGIN
+    dbms_output.put_line('GoalID GameID PlayerID TeamID NumGoals NumAssists');
+    dbms_output.put_line('------ ------ -------- ------ -------- ----------');
     FOR i IN (
         SELECT
             *
@@ -50,6 +57,8 @@ END;
 -- PLAYERS
 CREATE OR REPLACE PROCEDURE spplayersselectall IS
 BEGIN
+    dbms_output.put_line('PlayerID RegNumber LastName FirstName IsActive');
+    dbms_output.put_line('-------- ---------- -------- --------- --------');
     FOR i IN (
         SELECT
             *
@@ -64,6 +73,8 @@ END;
 -- ROSTERS
 CREATE OR REPLACE PROCEDURE sprostersselectall IS
 BEGIN
+    dbms_output.put_line('RosterID PlayerID TeamID IsActive JerseyNumber');
+    dbms_output.put_line('-------- -------- ------ -------- ------------');
     FOR i IN (
         SELECT
             *
@@ -78,6 +89,8 @@ END;
 -- SLLOCATIONS
 CREATE OR REPLACE PROCEDURE splocationsselectall IS
 BEGIN
+    dbms_output.put_line('LocationID LocationName FieldLength IsActive');
+    dbms_output.put_line('---------- ------------ ----------- --------');
     FOR i IN (
         SELECT
             *
@@ -92,6 +105,8 @@ END;
 -- STANDINGS
 CREATE OR REPLACE PROCEDURE spstandingsselectall IS
 BEGIN
+    dbms_output.put_line('TeamID TeamName GP W L T PTS GF GA GD');
+    dbms_output.put_line('------ -------- -- - - - --- -- -- --');
     FOR i IN (
         SELECT
             *
@@ -106,6 +121,8 @@ END;
 -- TEAMS
 CREATE OR REPLACE PROCEDURE spteamsselectall IS
 BEGIN
+    dbms_output.put_line('TeamID TeamName IsActive JerseyColour');
+    dbms_output.put_line('------ -------- -------- ------------');
     FOR i IN (
         SELECT
             *
@@ -120,6 +137,8 @@ END;
 -- TEAMSINDIVS
 CREATE OR REPLACE PROCEDURE spteamsindivsselectall IS
 BEGIN
+    dbms_output.put_line('LinkID TeamID DivID');
+    dbms_output.put_line('------ ------ -----');
     FOR i IN (
         SELECT
             *
@@ -134,6 +153,8 @@ END;
 -- XPEOPLE
 CREATE OR REPLACE PROCEDURE spxpeopleselectall IS
 BEGIN
+    dbms_output.put_line('PID FirstName LastName DOB IsActive FavNum');
+    dbms_output.put_line('--- --------- -------- --- -------- ------');
     FOR i IN (
         SELECT
             *
@@ -142,5 +163,19 @@ BEGIN
     ) LOOP
         dbms_output.put_line(i.pid || ' ' || i.firstname || ' ' || i.lastname || ' ' || i.dob || ' ' || i.isactive || ' ' || i.favnum);
     END LOOP;
+END;
+/
+
+BEGIN
+    spdivsselectall;
+    spgamesselectall;
+    spgoalscorersselectall;
+    spplayersselectall;
+    sprostersselectall;
+    splocationsselectall;
+    spstandingsselectall;
+    spteamsselectall;
+    spteamsindivsselectall;
+    spxpeopleselectall;
 END;
 /
