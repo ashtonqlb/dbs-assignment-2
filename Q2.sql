@@ -165,17 +165,3 @@ BEGIN
     END LOOP;
 END;
 /
-
-BEGIN
-    spdivsselectall;
-    spgamesselectall;
-    spgoalscorersselectall;
-    spplayersselectall;
-    sprostersselectall;
-    splocationsselectall;
-    spstandingsselectall;
-    spteamsselectall;
-    spteamsindivsselectall;
-    spxpeopleselectall;
-END;
-/
