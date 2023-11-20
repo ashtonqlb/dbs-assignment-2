@@ -7,7 +7,7 @@
 
 
 -- DIVS
-CREATE OR REPLACE PROCEDURE spdivsselectall IS
+CREATE OR REPLACE PROCEDURE spDivsSelectAll IS
 BEGIN
     dbms_output.put_line('DivID DivName IsActive IsDefault DisplayOrder');
     dbms_output.put_line('----- ------- -------- --------- ------------');
@@ -23,7 +23,7 @@ END;
 /
 
 -- GAMES
-CREATE OR REPLACE PROCEDURE spgamesselectall IS
+CREATE OR REPLACE PROCEDURE spGamesSelectAll IS
 BEGIN
     dbms_output.put_line('GameID DivID GameNum GameDateTime HomeTeam HomeScore VisitTeam VisitScore LocationID IsPlayed Notes');
     dbms_output.put_line('------ ----- -------- ----------- -------- --------- --------- ---------- -------- -----');
@@ -39,7 +39,7 @@ END;
 /
 
 -- GOALSCORERS
-CREATE OR REPLACE PROCEDURE spgoalscorersselectall IS
+CREATE OR REPLACE PROCEDURE spGoalScorersSelectAll IS
 BEGIN
     dbms_output.put_line('GoalID GameID PlayerID TeamID NumGoals NumAssists');
     dbms_output.put_line('------ ------ -------- ------ -------- ----------');
@@ -55,7 +55,7 @@ END;
 /
 
 -- PLAYERS
-CREATE OR REPLACE PROCEDURE spplayersselectall IS
+CREATE OR REPLACE PROCEDURE spPlayersSelectAll IS
 BEGIN
     dbms_output.put_line('PlayerID RegNumber LastName FirstName IsActive');
     dbms_output.put_line('-------- ---------- -------- --------- --------');
@@ -71,7 +71,7 @@ END;
 /
 
 -- ROSTERS
-CREATE OR REPLACE PROCEDURE sprostersselectall IS
+CREATE OR REPLACE PROCEDURE spRostersSelectAll IS
 BEGIN
     dbms_output.put_line('RosterID PlayerID TeamID IsActive JerseyNumber');
     dbms_output.put_line('-------- -------- ------ -------- ------------');
@@ -87,7 +87,7 @@ END;
 /
 
 -- SLLOCATIONS
-CREATE OR REPLACE PROCEDURE splocationsselectall IS
+CREATE OR REPLACE PROCEDURE spLocationsSelectAll IS
 BEGIN
     dbms_output.put_line('LocationID LocationName FieldLength IsActive');
     dbms_output.put_line('---------- ------------ ----------- --------');
@@ -103,7 +103,7 @@ END;
 /
 
 -- STANDINGS
-CREATE OR REPLACE PROCEDURE spstandingsselectall IS
+CREATE OR REPLACE PROCEDURE spStandingsSelectAll IS
 BEGIN
     dbms_output.put_line('TeamID TeamName GP W L T PTS GF GA GD');
     dbms_output.put_line('------ -------- -- - - - --- -- -- --');
@@ -119,7 +119,7 @@ END;
 /
 
 -- TEAMS
-CREATE OR REPLACE PROCEDURE spteamsselectall IS
+CREATE OR REPLACE PROCEDURE spTeamsSelectAll IS
 BEGIN
     dbms_output.put_line('TeamID TeamName IsActive JerseyColour');
     dbms_output.put_line('------ -------- -------- ------------');
@@ -135,7 +135,7 @@ END;
 /
 
 -- TEAMSINDIVS
-CREATE OR REPLACE PROCEDURE spteamsindivsselectall IS
+CREATE OR REPLACE PROCEDURE spTeamsIndivsSelectAll IS
 BEGIN
     dbms_output.put_line('LinkID TeamID DivID');
     dbms_output.put_line('------ ------ -----');
@@ -151,7 +151,7 @@ END;
 /
 
 -- XPEOPLE
-CREATE OR REPLACE PROCEDURE spxpeopleselectall IS
+CREATE OR REPLACE PROCEDURE spXPeopleSelectAll IS
 BEGIN
     dbms_output.put_line('PID FirstName LastName DOB IsActive FavNum');
     dbms_output.put_line('--- --------- -------- --- -------- ------');
