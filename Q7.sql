@@ -3,7 +3,8 @@
 
 /**
  * 
- * Selects all team IDs and team names and then counts how many player IDs have the selected team ID.
+ * Selects all team IDs and team names and then counts 
+ * how many player IDs have the selected team ID.
  *
  * @note Teams are ordered biggest to smallest
  * 
