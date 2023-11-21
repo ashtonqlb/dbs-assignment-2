@@ -1,8 +1,6 @@
 -- DBS311NEE Assignment 2 - Task 1
 -- Author: Ashton Lunken (abennet@myseneca.ca)
 
-SET SERVEROUTPUT ON;
-
 /**
  * This class handles database operations related to the PLAYERS, TEAMS and ROSTERS table.
  * It includes methods to insert, update, delete, and select player records, along with sample execution code.
@@ -45,12 +43,11 @@ SET SERVEROUTPUT ON;
  * @param p_first_name  The first name of the player.
  * @param p_is_active   Indicates whether the player is active (1) or not (0).
  * @param p_error_code  (OUT) Indicate the type of any potential errors. See table.
- * 
+ *
  * @exception DUP_VAL_ON_INDEX Raised when a duplicate player ID or registration number is encountered.
  * @exception VALUE_ERROR Raised when there is a mismatch in data types or formats.
  * @exception OTHERS Catches all other exceptions and displays the error message.
  */
-
 CREATE OR REPLACE PROCEDURE spPlayersInsert (
     p_player_id IN INTEGER DEFAULT NULL,
     p_reg_number IN VARCHAR2,
