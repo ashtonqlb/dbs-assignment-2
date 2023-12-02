@@ -1,6 +1,6 @@
 SET SERVEROUTPUT ON;
 
- /**
+/**
  * Error Codes:
  * <table border="1" summary="Error codes and their meanings">
  *     <tr>
@@ -55,20 +55,34 @@ CREATE OR REPLACE PROCEDURE spPlayersInsert (
     v_max_id INTEGER := 0;
 BEGIN
     IF p_player_id IS NULL THEN
-        SELECT COALESCE(MAX(playerid), 0) + 1 INTO v_max_id FROM PLAYERS;
+        SELECT
+            COALESCE(MAX(playerid), 0) + 1 INTO v_max_id
+        FROM
+            PLAYERS;
     ELSE
         v_max_id := p_player_id;
     END IF;
 
-    INSERT INTO PLAYERS (playerid, regnumber, lastname, firstname, isactive)
-    VALUES (v_max_id, p_reg_number, p_last_name, p_first_name, p_is_active);
-    EXCEPTION
-        WHEN DUP_VAL_ON_INDEX THEN
-            p_error_code := -2;
-        WHEN VALUE_ERROR THEN
-            p_error_code := -3;
-        WHEN OTHERS THEN
-            p_error_code := -4;
+    INSERT INTO PLAYERS (
+        playerid,
+        regnumber,
+        lastname,
+        firstname,
+        isactive
+    ) VALUES (
+        v_max_id,
+        p_reg_number,
+        p_last_name,
+        p_first_name,
+        p_is_active
+    );
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        p_error_code := -2;
+    WHEN VALUE_ERROR THEN
+        p_error_code := -3;
+    WHEN OTHERS THEN
+        p_error_code := -4;
 END;
 /
 
@@ -94,23 +108,24 @@ CREATE OR REPLACE PROCEDURE spPlayersUpdate (
     p_first_name IN VARCHAR2,
     p_is_active IN INTEGER,
     p_error_code OUT INTEGER
-) IS BEGIN
+) IS
+BEGIN
     UPDATE PLAYERS
-    SET   regnumber = p_reg_number,
-          lastname  = p_last_name,
-          firstname = p_first_name,
-          isactive  = p_is_active
-    WHERE playerid  = p_player_id;
-
+    SET
+        regnumber = p_reg_number,
+        lastname = p_last_name,
+        firstname = p_first_name,
+        isactive = p_is_active
+    WHERE
+        playerid = p_player_id;
     IF SQL%ROWCOUNT = 0 THEN
         p_error_code := -1;
     END IF;
-
-    EXCEPTION
-        WHEN VALUE_ERROR THEN
-            p_error_code := -3;
-        WHEN OTHERS THEN
-            p_error_code := -4;
+EXCEPTION
+    WHEN VALUE_ERROR THEN
+        p_error_code := -3;
+    WHEN OTHERS THEN
+        p_error_code := -4;
 END;
 /
 
@@ -130,12 +145,12 @@ CREATE OR REPLACE PROCEDURE spPlayersDelete (
     p_error_code OUT INTEGER
 ) IS
 BEGIN
-    DELETE FROM PLAYERS WHERE playerid = p_player_id;
-
+    DELETE FROM PLAYERS
+    WHERE
+        playerid = p_player_id;
     IF SQL%ROWCOUNT = 0 THEN
-        p_error_code := -1; 
+        p_error_code := -1;
     END IF;
-
 EXCEPTION
     WHEN OTHERS THEN
         p_error_code := -4;
@@ -167,10 +182,20 @@ CREATE OR REPLACE PROCEDURE spPlayersSelect (
     p_first_name OUT VARCHAR2,
     p_is_active OUT INTEGER,
     p_error_code OUT INTEGER
-) IS BEGIN
-    SELECT regnumber, lastname, firstname, isactive INTO p_reg_number, p_last_name, p_first_name, p_is_active
-    FROM PLAYERS WHERE playerid = p_player_id;
-
+) IS
+BEGIN
+    SELECT
+        regnumber,
+        lastname,
+        firstname,
+        isactive INTO p_reg_number,
+        p_last_name,
+        p_first_name,
+        p_is_active
+    FROM
+        PLAYERS
+    WHERE
+        playerid = p_player_id;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         p_error_code := -1;
@@ -182,12 +207,162 @@ END;
 /
 
 -- Q2
+/*  Outputs the contents of the table to the script window 
+    (using DBMS_OUTPUT) for the standard SELECT * FROM <tablename> statement.   */
+-- PLAYERS
+CREATE OR REPLACE PROCEDURE spPlayersSelectAll IS
+BEGIN
+    dbms_output.put_line('PlayerID RegNumber LastName FirstName IsActive');
+    dbms_output.put_line('-------- ---------- -------- --------- --------');
+    FOR i IN (
+        SELECT
+            *
+        FROM
+            players
+    ) LOOP
+        dbms_output.put_line(i.playerid || ' ' || i.regnumber || ' ' || i.lastname || ' ' || i.firstname || ' ' || i.isactive);
+    END LOOP;
+END;
+/
 
+-- ROSTERS
+CREATE OR REPLACE PROCEDURE spRostersSelectAll IS
+BEGIN
+    dbms_output.put_line('RosterID PlayerID TeamID IsActive JerseyNumber');
+    dbms_output.put_line('-------- -------- ------ -------- ------------');
+    FOR i IN (
+        SELECT
+            *
+        FROM
+            rosters
+    ) LOOP
+        dbms_output.put_line(i.rosterid || ' ' || i.playerid|| ' ' || i.teamid|| ' ' || i.isactive|| ' ' || i.jerseynumber);
+    END LOOP;
+END;
+/
 
+-- TEAMS
+CREATE OR REPLACE PROCEDURE spTeamsSelectAll IS
+BEGIN
+    dbms_output.put_line('TeamID TeamName IsActive JerseyColour');
+    dbms_output.put_line('------ -------- -------- ------------');
+    FOR i IN (
+        SELECT
+            *
+        FROM
+            teams
+    ) LOOP
+        dbms_output.put_line(i.teamid || ' ' || i.teamname || ' ' || i.isactive || ' ' || i.jerseycolour);
+    END LOOP;
+END;
+/
 
 -- Q3
+/*  As Q2, but returning the table in the output of the SP. 
+Use a non-saved procedure to show receiving the data and outputting it to the script window. */
 
+-- **************************************************************************************
+-- Table-returning stored procedures
+-- **************************************************************************************
 
+CREATE OR REPLACE PROCEDURE spPlayersSelectAll(
+    p_cursor OUT SYS_REFCURSOR
+) IS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT
+            *
+        FROM
+            players;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE spRostersSelectAll(
+    p_cursor OUT SYS_REFCURSOR
+) IS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT
+            *
+        FROM
+            rosters;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE spTeamsSelectAll(
+    p_cursor OUT SYS_REFCURSOR
+) IS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT
+            *
+        FROM
+            teams;
+END;
+/
+
+-- **************************************************************************************
+-- Non-saved procedures to show receiving the data and outputting it to the script window
+-- **************************************************************************************
+
+-- PLAYERS
+DECLARE
+    v_cursor    SYS_REFCURSOR;
+    v_playerID  NUMBER;
+    v_regNum    NUMBER;
+    v_lastName  VARCHAR2(50);
+    v_firstName VARCHAR2(50);
+    v_isActive  NUMBER;
+BEGIN
+    spPlayersSelectAll(SYS_REFCURSOR);
+    LOOP
+        FETCH v_cursor INTO v_playerID, v_regNum, v_lastName, v_firstName, v_isActive;
+        EXIT WHEN v_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_playerID || ' ' || v_regNum || ' ' || v_lastName || ' ' || v_firstName || ' ' || v_isActive);
+    END LOOP;
+
+    CLOSE v_cursor;
+END;
+/
+
+-- ROSTERS
+DECLARE
+    v_cursor    SYS_REFCURSOR;
+    v_rosterID  NUMBER;
+    v_playerID  NUMBER;
+    v_teamID    NUMBER;
+    v_isActive  NUMBER;
+    v_jerseyNum NUMBER;
+BEGIN
+    spRostersSelectAll(v_cursor);
+    LOOP
+        FETCH v_cursor INTO v_rosterID, v_playerID, v_teamID, v_isActive, v_jerseyNum;
+        EXIT WHEN v_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_rosterID || ' ' || v_playerID || ' ' || v_teamID || ' ' || v_isActive || ' ' || v_jerseyNum);
+    END LOOP;
+
+    CLOSE v_cursor;
+END;
+/
+
+-- TEAMS
+DECLARE
+    v_cursor     SYS_REFCURSOR;
+    v_teamID     NUMBER;
+    v_teamName   VARCHAR2(50);
+    v_isActive   NUMBER;
+    v_jerseyNums VARCHAR2(50);
+BEGIN
+    spTeamsSelectAll(v_cursor);
+    LOOP
+        FETCH v_cursor INTO v_teamID, v_teamName, v_isActive, v_jerseyNums;
+        EXIT WHEN v_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_teamID || ' ' || v_teamName || ' ' || v_isActive || ' ' || v_jerseyNums);
+    END LOOP;
+
+    CLOSE v_cursor;
+END;
+/
 
 -- Q4
 CREATE OR REPLACE VIEW vwPlayerRosters AS
@@ -204,8 +379,10 @@ CREATE OR REPLACE VIEW vwPlayerRosters AS
         t.jerseycolour jerseycolour
     FROM
         players p
-    INNER JOIN rosters r ON p.playerid = r.playerid
-    INNER JOIN teams t ON r.teamid = t.teamid;
+        INNER JOIN rosters r
+        ON p.playerid = r.playerid
+        INNER JOIN teams t
+        ON r.teamid = t.teamid;
 
 -- Q5
 CREATE OR REPLACE PROCEDURE spteamrosterbyid (
@@ -243,41 +420,34 @@ CREATE OR REPLACE PROCEDURE spTeamRosterByName (
 ) AS
     v_result_quantity INTEGER := 0;
     CURSOR cTeamRoster IS
-        SELECT
-            playerid,
-            regnumber,
-            lastname,
-            firstname,
-            isactive,
-            rosterid,
-            teamid,
-            jerseynumber,
-            teamname,
-            jerseycolour
-        FROM
-            vwPlayerRosters
-        WHERE
-            LOWER(teamname) LIKE LOWER('%' || p_team_name || '%');
+    SELECT
+        playerid,
+        regnumber,
+        lastname,
+        firstname,
+        isactive,
+        rosterid,
+        teamid,
+        jerseynumber,
+        teamname,
+        jerseycolour
+    FROM
+        vwPlayerRosters
+    WHERE
+        LOWER(teamname) LIKE LOWER('%' || p_team_name || '%');
 BEGIN
     FOR roster_record IN cTeamRoster LOOP
         v_result_quantity := v_result_quantity + 1; -- Increment the counter
-        DBMS_OUTPUT.PUT_LINE
-        (
-            'Result ' || TO_CHAR(v_result_quantity) || CHR(10) 
-            || 'Name: ' || roster_record.firstname || ' ' || roster_record.lastname || CHR(10)
-            || 'Jersey Number: ' || roster_record.jerseynumber || CHR(10)
-            || 'Team: ' || roster_record.teamname || CHR(10)
-        );
+        DBMS_OUTPUT.PUT_LINE ( 'Result ' || TO_CHAR(v_result_quantity) || CHR(10) || 'Name: ' || roster_record.firstname || ' ' || roster_record.lastname || CHR(10) || 'Jersey Number: ' || roster_record.jerseynumber || CHR(10) || 'Team: ' || roster_record.teamname || CHR(10) );
     END LOOP;
 
-EXCEPTIONS
-    WHEN NO_DATA_FOUND THEN
+    EXCEPTIONS WHEN NO_DATA_FOUND THEN
         p_error_code := 1;
-    WHEN VALUE_ERROR THEN
-        p_error_code := -3;
-    WHEN OTHERS THEN
-        p_error_code := -4;
-END;
+        WHEN VALUE_ERROR THEN
+            p_error_code := -3;
+            WHEN OTHERS THEN
+                p_error_code := -4;
+            END;
 /
 
 /**
@@ -290,14 +460,16 @@ END;
  * 
  */
 
-CREATE OR REPLACE VIEW vwTeamsNumPlayers AS 
-    SELECT 
+CREATE OR REPLACE VIEW vwTeamsNumPlayers AS
+    SELECT
         t.teamid,
         t.teamname,
-        COUNT(r.playerid) AS num_players 
-    FROM 
-        TEAMS t
-    LEFT JOIN ROSTERS r on t.teamid = r.teamid AND r.isactive = 1
+        COUNT(r.playerid) AS num_players
+    FROM
+        TEAMS   t
+        LEFT JOIN ROSTERS r
+        on t.teamid = r.teamid
+        AND r.isactive = 1
     GROUP BY
         t.teamid,
         t.teamname
@@ -323,48 +495,47 @@ CREATE OR REPLACE VIEW vwTeamsNumPlayers AS
 
 CREATE OR REPLACE FUNCTION fncNumPlayersByTeamID (
     p_team_id IN NUMBER
-) RETURN NUMBER
-IS
+) RETURN NUMBER IS
     v_num_players NUMBER;
 BEGIN
-    SELECT 
-        num_players
-    INTO
-        v_num_players
+    SELECT
+        num_players INTO v_num_players
     FROM
         vwTeamsNumPlayers
-    WHERE 
+    WHERE
         teamid = p_team_id;
-
     IF v_num_players IS NOT NULL THEN
         RETURN v_num_players;
     END IF;
-
 EXCEPTION
-WHEN NO_DATA_FOUND THEN
-    RETURN -1; 
-WHEN OTHERS THEN
-    RETURN -4;
+    WHEN NO_DATA_FOUND THEN
+        RETURN -1;
+    WHEN OTHERS THEN
+        RETURN -4;
 END;
 /
 
--- Q9 
+-- Q9
 
 CREATE OR REPLACE VIEW vwSchedule AS
     SELECT
         g.gamenum,
         g.gamedatetime,
         g.hometeam,
-        ht.teamname as HomeTeamName,
+        ht.teamname    as HomeTeamName,
         g.visitteam,
-        vt.teamname as VisitTeamName,
+        vt.teamname    as VisitTeamName,
         l.locationname
-    FROM 
-        GAMES g
-    INNER JOIN SLLOCATIONS l ON g.locationid = l.locationid
-    INNER JOIN TEAMS ht ON g.hometeam = ht.teamid
-    INNER JOIN TEAMS vt ON g.visitteam = vt.teamid
-    ORDER BY g.gamedatetime;
+    FROM
+        GAMES       g
+        INNER JOIN SLLOCATIONS l
+        ON g.locationid = l.locationid
+        INNER JOIN TEAMS ht
+        ON g.hometeam = ht.teamid
+        INNER JOIN TEAMS vt
+        ON g.visitteam = vt.teamid
+    ORDER BY
+        g.gamedatetime;
 
 /**
  * Q10
@@ -382,35 +553,36 @@ CREATE OR REPLACE VIEW vwSchedule AS
 CREATE OR REPLACE PROCEDURE spSchedUpcomingGames(
     n IN INTEGER
 ) IS
-  CURSOR cUpcomingGames IS
-      SELECT gamenum, gamedatetime, HomeTeamName, VisitTeamName
-      FROM vwSchedule
-      WHERE gamedatetime BETWEEN SYSDATE AND SYSDATE + n
-      ORDER BY gamedatetime;
-  v_game_num INTEGER;
-  v_game_date_time DATE;
-  v_home_team_name VARCHAR2(10);
-  v_visit_team_name VARCHAR2(10);
+    CURSOR cUpcomingGames IS
+    SELECT
+        gamenum,
+        gamedatetime,
+        HomeTeamName,
+        VisitTeamName
+    FROM
+        vwSchedule
+    WHERE
+        gamedatetime BETWEEN SYSDATE AND SYSDATE + n
+    ORDER BY
+        gamedatetime;
+    v_game_num        INTEGER;
+    v_game_date_time  DATE;
+    v_home_team_name  VARCHAR2(10);
+    v_visit_team_name VARCHAR2(10);
 BEGIN
-  OPEN cUpcomingGames;
+    OPEN cUpcomingGames;
+    LOOP
+        FETCH cUpcomingGames INTO v_game_num, v_game_date_time, v_home_team_name, v_visit_team_name;
+        EXIT WHEN cUpcomingGames%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE( 'Game Number: ' || v_game_num || ', Date: ' || TO_CHAR(v_game_date_time, 'DD-MON-YYYY') || ', Home Team: ' || v_home_team_name || ', Visit Team: ' || v_visit_team_name );
+    END LOOP;
 
-  LOOP
-    FETCH cUpcomingGames INTO v_game_num, v_game_date_time, v_home_team_name, v_visit_team_name;
-    EXIT WHEN cUpcomingGames%NOTFOUND;
-
-    DBMS_OUTPUT.PUT_LINE(
-        'Game Number: ' || v_game_num || 
-        ', Date: ' || TO_CHAR(v_game_date_time, 'DD-MON-YYYY') || 
-        ', Home Team: ' || v_home_team_name || 
-        ', Visit Team: ' || v_visit_team_name
-    );
-  END LOOP;
-  CLOSE cUpcomingGames;
+    CLOSE cUpcomingGames;
 EXCEPTION
-  WHEN OTHERS THEN
-    IF cUpcomingGames%ISOPEN THEN
-      CLOSE cUpcomingGames;
-    END IF;
+    WHEN OTHERS THEN
+        IF cUpcomingGames%ISOPEN THEN
+            CLOSE cUpcomingGames;
+        END IF;
 END spSchedUpcomingGames;
 /
 
@@ -419,9 +591,38 @@ END spSchedUpcomingGames;
 BEGIN
     spteamrosterbyid(210);
     spTeamRosterByName('Aurora');
-    SELECT * FROM vwTeamsNumPlayers
-    SELECT fncNumPlayersByTeamID(216) FROM DUAL;
-    SELECT * FROM vwSchedule;
+    SELECT
+        *
+    FROM
+        vwTeamsNumPlayers
+        SELECT
+            fncNumPlayersByTeamID(216)
+        FROM
+            DUAL;
+    SELECT
+        *
+    FROM
+        vwSchedule;
     spSchedUpcomingGames(7);
+END;
+/
+
+-- Q11
+-- Displays the games that have been played in the past n days, where n is an input parameter.
+CREATE OR REPLACE PROCEDURE spSchedPastGames (
+    n IN NUMBER
+) IS
+BEGIN
+    FOR i IN (
+        SELECT
+            *
+        FROM
+            games
+        WHERE
+            gamedatetime BETWEEN sysdate - n AND sysdate -- scheduled in past n days
+            AND isplayed = 1 -- played at all
+    ) LOOP
+        dbms_output.put_line(i.gameid || ' ' || i.divid || ' ' || i.gamenum || ' ' || i.gamedatetime || ' ' || i.hometeam || ' ' || i.homescore|| ' ' || i.visitteam || ' ' || i.visitscore || ' ' || i.locationid || ' ' || i.isplayed || ' ' || i.notes);
+    END LOOP;
 END;
 /
