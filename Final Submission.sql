@@ -586,6 +586,33 @@ EXCEPTION
 END spSchedUpcomingGames;
 /
 
+-- Q11
+-- Displays the games that have been played in the past n days, where n is an input parameter.
+CREATE OR REPLACE PROCEDURE spSchedPastGames (
+    n IN NUMBER
+) IS
+BEGIN
+    FOR i IN (
+        SELECT
+            *
+        FROM
+            games
+        WHERE
+            gamedatetime BETWEEN sysdate - n AND sysdate -- scheduled in past n days
+            AND isplayed = 1 -- played at all
+    ) LOOP
+        dbms_output.put_line(i.gameid || ' ' || i.divid || ' ' || i.gamenum || ' ' || i.gamedatetime || ' ' || i.hometeam || ' ' || i.homescore|| ' ' || i.visitteam || ' ' || i.visitscore || ' ' || i.locationid || ' ' || i.isplayed || ' ' || i.notes);
+    END LOOP;
+END;
+/
+
+--Q12
+
+--Q13
+
+--Q14
+
+
 -- Sample execution code
 
 BEGIN
@@ -604,25 +631,5 @@ BEGIN
     FROM
         vwSchedule;
     spSchedUpcomingGames(7);
-END;
-/
-
--- Q11
--- Displays the games that have been played in the past n days, where n is an input parameter.
-CREATE OR REPLACE PROCEDURE spSchedPastGames (
-    n IN NUMBER
-) IS
-BEGIN
-    FOR i IN (
-        SELECT
-            *
-        FROM
-            games
-        WHERE
-            gamedatetime BETWEEN sysdate - n AND sysdate -- scheduled in past n days
-            AND isplayed = 1 -- played at all
-    ) LOOP
-        dbms_output.put_line(i.gameid || ' ' || i.divid || ' ' || i.gamenum || ' ' || i.gamedatetime || ' ' || i.hometeam || ' ' || i.homescore|| ' ' || i.visitteam || ' ' || i.visitscore || ' ' || i.locationid || ' ' || i.isplayed || ' ' || i.notes);
-    END LOOP;
 END;
 /
