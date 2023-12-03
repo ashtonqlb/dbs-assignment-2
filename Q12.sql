@@ -9,9 +9,26 @@
 -- create a Stored Procedure, named spRunStandings, that replaces a temporary static table,
 -- named tempStandings, with the output of the SELECT code provided.
 
+-- This only needs to be run once:
+
+-- CREATE GLOBAL TEMPORARY TABLE tempStandings (
+--     theteamid NUMBER,
+--     teamname VARCHAR2(255),
+--     gp NUMBER,
+--     w NUMBER,
+--     l NUMBER,
+--     t NUMBER,
+--     pts NUMBER,
+--     gf NUMBER,
+--     ga NUMBER,
+--     gd NUMBER
+-- ) ON COMMIT PRESERVE ROWS;
+
 CREATE OR REPLACE PROCEDURE spRunStandings AS
 BEGIN
- -- Insert data into tempStandings using your SELECT statement
+ -- First, clear the existing data from the tempStandings table
+    DELETE FROM tempStandings;
+ -- Insert data into the tempStandings table
     INSERT INTO tempStandings (
         theteamid,
         teamname,
@@ -44,6 +61,7 @@ BEGIN
             SUM(goalsfor) - SUM(goalsagainst) AS gd
         FROM
             (
+ -- from the home team perspective
                 SELECT
                     hometeam        AS theteamid,
                     COUNT(gameid)   AS gamesplayed,
@@ -78,7 +96,7 @@ BEGIN
                     hometeam
                 UNION
                 ALL
- -- From the perspective of the visiting team
+ -- from the perspective of the visiting team
                 SELECT
                     visitteam       AS theteamid,
                     COUNT(gameid)   AS gamesplayed,
@@ -114,4 +132,5 @@ BEGIN
             )     t
         GROUP BY
             theteamid;
-END spRunStandings;
+END;
+/
