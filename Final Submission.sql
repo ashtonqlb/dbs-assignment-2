@@ -607,9 +607,10 @@ END;
 /
 
 --Q12
+-- Replaces a temporary static table, named tempStandings, with the output of the SELECT code provided
+-- by the Standings demo earlier in the semester
 
 -- This only needs to be run once:
-
 -- CREATE GLOBAL TEMPORARY TABLE tempStandings (
 --     theteamid NUMBER,
 --     teamname VARCHAR2(255),
@@ -733,6 +734,15 @@ END;
 /
 
 --Q13
+/* Trigger in the system to automate the execution of the spRunStandings SP when any row in the games table is updated. 
+Essentially meaning that software can run SELECT * FROM tempStandings; and always have up to date standings. */
+
+CREATE OR REPLACE TRIGGER trRunStandings AFTER
+    UPDATE ON games
+BEGIN
+    spRunStandings;
+END;
+/
 
 --Q14
 
