@@ -13,7 +13,8 @@
  */
 
 CREATE OR REPLACE PROCEDURE spTeamRosterByName (
-    p_team_name IN VARCHAR2
+    p_team_name IN VARCHAR2,
+    p_error_code OUT INTEGER
 ) AS
     v_result_quantity INTEGER := 0;
     CURSOR cTeamRoster IS
@@ -44,7 +45,7 @@ BEGIN
         );
     END LOOP;
 
-EXCEPTIONS
+EXCEPTION
     WHEN NO_DATA_FOUND THEN
         p_error_code := 1;
     WHEN VALUE_ERROR THEN
@@ -54,7 +55,9 @@ EXCEPTIONS
 END;
 /
 
+DECLARE
+    error integer;
 BEGIN 
-    spTeamRosterByName('Aurora');
+    spTeamRosterByName('Aurora', error);
 END;
 /

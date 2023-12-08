@@ -314,7 +314,7 @@ DECLARE
     v_firstName VARCHAR2(50);
     v_isActive  NUMBER;
 BEGIN
-    spPlayersSelectAll(SYS_REFCURSOR);
+    spPlayersSelectAll(v_cursor);
     LOOP
         FETCH v_cursor INTO v_playerID, v_regNum, v_lastName, v_firstName, v_isActive;
         EXIT WHEN v_cursor%NOTFOUND;
@@ -415,39 +415,61 @@ END;
  * 
  */
 
+-- DBS311NEE Assignment 2 - Task 6
+-- Author: Ashton Lunken (abennet@myseneca.ca)
+
+/**
+ * Executes the 'spTeamRosterByName' stored procedure to fetch and display the team roster.
+ * This procedure searches the 'vwPlayerRosters' view for a team that includes the specified
+ * string in its name and prints out the roster to DBMS_OUTPUT.
+ *
+ * @param p_team_name A partial or full team name to search for within the team names.
+ * 
+ * @note It is case-insensitive.
+ * 
+ */
+
 CREATE OR REPLACE PROCEDURE spTeamRosterByName (
-    p_team_name IN VARCHAR2
+    p_team_name IN VARCHAR2,
+    p_error_code OUT INTEGER
 ) AS
     v_result_quantity INTEGER := 0;
     CURSOR cTeamRoster IS
-    SELECT
-        playerid,
-        regnumber,
-        lastname,
-        firstname,
-        isactive,
-        rosterid,
-        teamid,
-        jerseynumber,
-        teamname,
-        jerseycolour
-    FROM
-        vwPlayerRosters
-    WHERE
-        LOWER(teamname) LIKE LOWER('%' || p_team_name || '%');
+        SELECT
+            playerid,
+            regnumber,
+            lastname,
+            firstname,
+            isactive,
+            rosterid,
+            teamid,
+            jerseynumber,
+            teamname,
+            jerseycolour
+        FROM
+            vwPlayerRosters
+        WHERE
+            LOWER(teamname) LIKE LOWER('%' || p_team_name || '%');
 BEGIN
     FOR roster_record IN cTeamRoster LOOP
         v_result_quantity := v_result_quantity + 1; -- Increment the counter
-        DBMS_OUTPUT.PUT_LINE ( 'Result ' || TO_CHAR(v_result_quantity) || CHR(10) || 'Name: ' || roster_record.firstname || ' ' || roster_record.lastname || CHR(10) || 'Jersey Number: ' || roster_record.jerseynumber || CHR(10) || 'Team: ' || roster_record.teamname || CHR(10) );
+        DBMS_OUTPUT.PUT_LINE
+        (
+            'Result ' || TO_CHAR(v_result_quantity) || CHR(10) 
+            || 'Name: ' || roster_record.firstname || ' ' || roster_record.lastname || CHR(10)
+            || 'Jersey Number: ' || roster_record.jerseynumber || CHR(10)
+            || 'Team: ' || roster_record.teamname || CHR(10)
+        );
     END LOOP;
 
-    EXCEPTIONS WHEN NO_DATA_FOUND THEN
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
         p_error_code := 1;
-        WHEN VALUE_ERROR THEN
-            p_error_code := -3;
-            WHEN OTHERS THEN
-                p_error_code := -4;
-            END;
+    WHEN VALUE_ERROR THEN
+        p_error_code := -3;
+    WHEN OTHERS THEN
+        p_error_code := -4;
+END;
 /
 
 /**
@@ -749,22 +771,51 @@ END;
 
 -- Sample execution code
 
+-- Q1
+DECLARE
+    v_reg_number VARCHAR2(50);
+    v_last_name VARCHAR2(50);
+    v_first_name VARCHAR2(50);
+    v_is_active INTEGER;
+    v_error_code INTEGER;
 BEGIN
-    spteamrosterbyid(210);
-    spTeamRosterByName('Aurora');
+    spPlayersSelect(101, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
+
+    IF v_error_code = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Reg#: ' || v_reg_number || ', Last Name: ' || v_last_name || ', First Name: ' || v_first_name || ', Active: ' || v_is_active);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Error: ' || v_error_code);
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Unexpected error: ' || SQLERRM);
+END;
+/
+
+
+BEGIN
+    spteamrosterbyid(210);   -- Q?
+    spSchedUpcomingGames(7); -- Q?
+    spSchedPastGames(30);    -- Q?
+END;
+/
+
     SELECT
         *
     FROM
-        vwTeamsNumPlayers
-        SELECT
-            fncNumPlayersByTeamID(216)
-        FROM
-            DUAL;
+        vwTeamsNumPlayers;
+    SELECT
+        fncNumPlayersByTeamID(216)
+    FROM
+        DUAL;
     SELECT
         *
     FROM
         vwSchedule;
-    spSchedUpcomingGames(7);
-    spSchedPastGames(30);
+
+DECLARE
+    error integer;
+BEGIN 
+    spTeamRosterByName('Aurora', error);
 END;
 /

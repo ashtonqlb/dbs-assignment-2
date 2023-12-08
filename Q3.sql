@@ -60,7 +60,7 @@ DECLARE
     v_firstName VARCHAR2(50);
     v_isActive  NUMBER;
 BEGIN
-    spPlayersSelectAll(SYS_REFCURSOR);
+    spPlayersSelectAll(v_cursor);
     LOOP
         FETCH v_cursor INTO v_playerID, v_regNum, v_lastName, v_firstName, v_isActive;
         EXIT WHEN v_cursor%NOTFOUND;

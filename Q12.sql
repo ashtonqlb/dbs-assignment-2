@@ -1,7 +1,3 @@
--- ************************************************************
--- DO NOT COPY TO MAIN SUBMISSION - NOT FINISHED!
--- ************************************************************
-
 -- DBS311NEE Assignment 2 - Task 12
 -- Author: Liam Toye (lctoye@myseneca.ca)
 
