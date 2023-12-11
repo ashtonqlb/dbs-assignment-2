@@ -365,8 +365,64 @@ code {
           : 'default'
     });
   </script>
-<h2 id="users-guide-for-sports-league-stored-procedures">User's Guide for Sports League Stored Procedures</h2>
-<h4 id="procedure-q1-spplayersinsert">Procedure Q1: spPlayersInsert</h4>
+<h1 id="users-guide-for-sports-league-procedures-functions--triggers">User's Guide for Sports League Procedures, Functions &amp; Triggers</h1>
+<h3 id="table-of-contents">Table of Contents:</h3>
+<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+<ul>
+<li><a href="#procedure-q1-crud-operations-for-players-roster-and-teams-tables">Procedure Q1: CRUD Operations for PLAYERS, ROSTER and TEAMS tables</a>
+<ul>
+<li><a href="#players-table">PLAYERS Table</a>
+<ul>
+<li><a href="#spplayersinsert">spPlayersInsert</a></li>
+<li><a href="#spplayersupdate">spPlayersUpdate</a></li>
+<li><a href="#spplayersdelete">spPlayersDelete</a></li>
+<li><a href="#spplayersselect">spPlayersSelect</a></li>
+<li><a href="#spteamsinsert">spTeamsInsert</a></li>
+</ul>
+</li>
+<li><a href="#roster-table">ROSTER Table</a>
+<ul>
+<li><a href="#sprostersinsert">spRostersInsert</a></li>
+<li><a href="#sprostersupdate">spRostersUpdate</a></li>
+<li><a href="#sprostersdelete">spRostersDelete</a></li>
+<li><a href="#sprostersselect">spRostersSelect</a></li>
+</ul>
+</li>
+<li><a href="#teams-table">TEAMS Table</a>
+<ul>
+<li><a href="#spteamsupdate">spTeamsUpdate</a></li>
+<li><a href="#spteamsdelete">spTeamsDelete</a></li>
+<li><a href="#spteamsselect">spTeamsSelect</a></li>
+</ul>
+</li>
+<li><a href="#general-functions">General Functions</a>
+<ul>
+<li><a href="#fnvalidateplayerandteam">fnValidatePlayerAndTeam</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#procedure-q2-spplayersselectall-sprostersselectall-spteamsselectall">Procedure Q2: spPlayersSelectAll, spRostersSelectAll, spTeamsSelectAll</a></li>
+<li><a href="#procedure-q3-spplayersselectall-sprostersselectall-spteamsselectall-cursor-version">Procedure Q3: spPlayersSelectAll, spRostersSelectAll, spTeamsSelectAll (Cursor Version)</a></li>
+<li><a href="#procedure-q4-vwplayerrosters-view-creation">Procedure Q4: vwPlayerRosters (View Creation)</a></li>
+<li><a href="#procedure-q5-spteamrosterbyid">Procedure Q5: spTeamRosterByID</a></li>
+<li><a href="#procedure-q6-spteamrosterbyname">Procedure Q6: spTeamRosterByName</a></li>
+<li><a href="#procedure-q7-vwteamsnumplayers-view-creation">Procedure Q7: vwTeamsNumPlayers (View Creation)</a></li>
+<li><a href="#function-q8-fncnumplayersbyteamid">Function Q8: fncNumPlayersByTeamID</a></li>
+<li><a href="#procedure-q9-vwschedule-view-creation">Procedure Q9: vwSchedule (View Creation)</a></li>
+<li><a href="#procedure-q10-spschedupcominggames">Procedure Q10: spSchedUpcomingGames</a></li>
+<li><a href="#procedure-q11-spschedpastgames">Procedure Q11: spSchedPastGames</a></li>
+<li><a href="#procedure-q12-sprunstandings">Procedure Q12: spRunStandings</a></li>
+<li><a href="#trigger-q13-trrunstandings">Trigger Q13: trRunStandings</a></li>
+<li><a href="#procedure-q14-spgetallstars">Procedure Q14: spGetAllStars</a></li>
+</ul>
+<!-- TOC end -->
+<!-- TOC --><a name="procedure-q1-crud-operations-for-players-roster-and-teams-tables"></a>
+<h2 id="procedure-q1-crud-operations-for-players-roster-and-teams-tables">Procedure Q1: CRUD Operations for PLAYERS, ROSTER and TEAMS tables</h2>
+<!-- TOC --><a name="players-table"></a>
+<h3 id="players-table">PLAYERS Table</h3>
+<!-- TOC --><a name="spplayersinsert"></a>
+<h4 id="spplayersinsert">spPlayersInsert</h4>
 <ul>
 <li><strong>Purpose</strong>: Inserts a new player into the PLAYERS table, generating a new ID if not provided.</li>
 <li><strong>Input Parameters</strong>:
@@ -398,7 +454,375 @@ code {
 </div></code></pre>
 </li>
 </ul>
-<h4 id="procedure-q2-spplayersselectall-sprostersselectall-spteamsselectall">Procedure Q2: spPlayersSelectAll, spRostersSelectAll, spTeamsSelectAll</h4>
+<!-- TOC --><a name="spplayersupdate"></a>
+<h4 id="spplayersupdate">spPlayersUpdate</h4>
+<ul>
+<li><strong>Purpose</strong>: Updates an existing player's details in the PLAYERS table.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_player_id</code> (INTEGER): The unique ID of the player to be updated.</li>
+<li><code>p_reg_number</code> (VARCHAR2): The new registration number for the player.</li>
+<li><code>p_last_name</code> (VARCHAR2): The new last name for the player.</li>
+<li><code>p_first_name</code> (VARCHAR2): The new first name for the player.</li>
+<li><code>p_is_active</code> (INTEGER): Indicates the new active status of the player (1 for active, 0 for inactive).</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Output parameter for potential error codes.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: The player's record is updated. The success or failure is indicated by <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No player found with the provided ID.</li>
+<li><code>-3</code>: Data type/format mismatch.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_error_code <span class="hljs-built_in">INTEGER</span>;
+<span class="hljs-keyword">BEGIN</span>
+  spPlayersUpdate(<span class="hljs-number">123</span>, <span class="hljs-string">'54321'</span>, <span class="hljs-string">'Smith'</span>, <span class="hljs-string">'Jane'</span>, <span class="hljs-number">1</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="spplayersdelete"></a>
+<h4 id="spplayersdelete">spPlayersDelete</h4>
+<ul>
+<li><strong>Purpose</strong>: Deletes a player from the PLAYERS table based on their ID.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_player_id</code> (INTEGER): The ID of the player to be deleted.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Output parameter for potential error codes.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: The specified player's record is deleted. The success or failure is indicated by <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No player found with the provided ID.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_error_code <span class="hljs-built_in">INTEGER</span>;
+<span class="hljs-keyword">BEGIN</span>
+  spPlayersDelete(<span class="hljs-number">123</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="spplayersselect"></a>
+<h4 id="spplayersselect">spPlayersSelect</h4>
+<ul>
+<li><strong>Purpose</strong>: Selects and returns details of a player from the PLAYERS table based on their ID.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_player_id</code> (INTEGER): The ID of the player to be selected.</li>
+<li><code>p_reg_number</code> (OUT, VARCHAR2): Output parameter for the player's registration number.</li>
+<li><code>p_last_name</code> (OUT, VARCHAR2): Output parameter for the player's last name.</li>
+<li><code>p_first_name</code> (OUT, VARCHAR2): Output parameter for the player's first name.</li>
+<li><code>p_is_active</code> (OUT, INTEGER): Output parameter indicating whether the player is active (1) or not (0).</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Output parameter for potential error codes.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: Player details are returned in the output parameters. The success or failure is indicated by <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No player found with the provided ID.</li>
+<li><code>-2</code>: Multiple players found with the provided ID.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_reg_number <span class="hljs-built_in">VARCHAR2</span>(<span class="hljs-number">100</span>);
+  v_last_name VARCHAR2(100);
+  v_first_name VARCHAR2(100);
+  v_is_active INTEGER;
+  v_error_code INTEGER;
+<span class="hljs-keyword">BEGIN</span>
+  spPlayersSelect(<span class="hljs-number">123</span>, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
+  <span class="hljs-comment">-- Handle error and use output parameters</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="spteamsinsert"></a>
+<h4 id="spteamsinsert">spTeamsInsert</h4>
+<ul>
+<li><strong>Purpose</strong>: Inserts a new team into the TEAMS table, generating a new ID if not provided.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_team_id</code> (INTEGER, optional): Team ID. If NULL, a new ID is generated.</li>
+<li><code>p_team_name</code> (VARCHAR2): Name of the team.</li>
+<li><code>p_is_active</code> (INTEGER): Indicates active (1) or inactive (0) status of the team.</li>
+<li><code>p_jersey_colour</code> (VARCHAR2): Colour of the team's jersey.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Output parameter for potential error codes.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: None directly. Errors are indicated through <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-2</code>: Duplicate team ID.</li>
+<li><code>-3</code>: Data type/format mismatch.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_error_code <span class="hljs-built_in">INTEGER</span>;
+<span class="hljs-keyword">BEGIN</span>
+  spTeamsInsert(<span class="hljs-literal">NULL</span>, <span class="hljs-string">'Tigers'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'Orange'</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<hr>
+<!-- TOC --><a name="roster-table"></a>
+<h3 id="roster-table">ROSTER Table</h3>
+<!-- TOC --><a name="sprostersinsert"></a>
+<h4 id="sprostersinsert">spRostersInsert</h4>
+<ul>
+<li><strong>Purpose</strong>: Inserts a new roster record into the ROSTERS table.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_roster_id</code> (INTEGER, optional): Roster ID. If NULL, a new ID is generated.</li>
+<li><code>p_player_id</code> (INTEGER): Player ID in the roster.</li>
+<li><code>p_team_id</code> (INTEGER): Team ID in the roster.</li>
+<li><code>p_is_active</code> (INTEGER): Indicates if the roster is active (1) or not (0).</li>
+<li><code>p_jersey_number</code> (INTEGER): Jersey number of the player in the roster.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Error code indicating operation status.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: Inserts a roster record. Errors indicated through <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: Validation failed for player or team.</li>
+<li><code>-2</code>: Duplicate roster ID.</li>
+<li><code>-3</code>: Data type/format mismatch.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_error_code <span class="hljs-built_in">INTEGER</span>;
+<span class="hljs-keyword">BEGIN</span>
+  spRostersInsert(<span class="hljs-literal">NULL</span>, <span class="hljs-number">101</span>, <span class="hljs-number">201</span>, <span class="hljs-number">1</span>, <span class="hljs-number">9</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="sprostersupdate"></a>
+<h4 id="sprostersupdate">spRostersUpdate</h4>
+<ul>
+<li><strong>Purpose</strong>: Updates an existing roster record in the ROSTERS table.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_roster_id</code> (INTEGER): ID of the roster to be updated.</li>
+<li><code>p_player_id</code> (INTEGER): New player ID for the roster.</li>
+<li><code>p_team_id</code> (INTEGER): New team ID for the roster.</li>
+<li><code>p_is_active</code> (INTEGER): New active status of the roster.</li>
+<li><code>p_jersey_number</code> (INTEGER): New jersey number of the player in the roster.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Error code indicating operation status.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: Updates a roster record. Errors indicated through <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No roster found with provided ID or validation failed.</li>
+<li><code>-3</code>: Data type/format mismatch.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">BEGIN</span>
+  spRostersUpdate(<span class="hljs-number">10</span>, <span class="hljs-number">101</span>, <span class="hljs-number">201</span>, <span class="hljs-number">0</span>, <span class="hljs-number">8</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="sprostersdelete"></a>
+<h4 id="sprostersdelete">spRostersDelete</h4>
+<ul>
+<li><strong>Purpose</strong>: Deletes a roster record from the ROSTERS table based on the provided roster ID.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_roster_id</code> (INTEGER): ID of the roster to be deleted.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Error code indicating operation status.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: Deletes a roster record. Errors indicated through <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No roster found with the provided ID.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_error_code <span class="hljs-built_in">INTEGER</span>;
+<span class="hljs-keyword">BEGIN</span>
+  spRostersDelete(<span class="hljs-number">10</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="sprostersselect"></a>
+<h4 id="sprostersselect">spRostersSelect</h4>
+<ul>
+<li><strong>Purpose</strong>: Selects and returns details of a roster from the ROSTERS table based on the roster ID.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_roster_id</code> (INTEGER): ID of the roster to be selected.</li>
+<li><code>p_player_id</code> (OUT, INTEGER): Player ID in the roster.</li>
+<li><code>p_team_id</code> (OUT, INTEGER): Team ID in the roster.</li>
+<li><code>p_is_active</code> (OUT, INTEGER): Indicates if the roster is active or not.</li>
+<li><code>p_jersey_number</code> (OUT, INTEGER): Jersey number of the player in the roster.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Error code indicating operation status.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: Returns roster details. Errors indicated through <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No roster found with the provided ID.</li>
+<li><code>-2</code>: Multiple rosters found with the provided ID.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_player_id <span class="hljs-built_in">INTEGER</span>;
+  v_team_id INTEGER;
+  v_is_active INTEGER;
+  v_jersey_number INTEGER;
+  v_error_code INTEGER;
+<span class="hljs-keyword">BEGIN</span>
+  spRostersSelect(<span class="hljs-number">10</span>, v_player_id, v_team_id, v_is_active, v_jersey_number, v_error_code);
+  <span class="hljs-comment">-- Handle error and use output parameters</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<hr>
+<!-- TOC --><a name="teams-table"></a>
+<h3 id="teams-table">TEAMS Table</h3>
+<!-- TOC --><a name="spteamsupdate"></a>
+<h4 id="spteamsupdate">spTeamsUpdate</h4>
+<ul>
+<li><strong>Purpose</strong>: Updates an existing team's details in the TEAMS table.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_team_id</code> (INTEGER): The ID of the team to be updated.</li>
+<li><code>p_team_name</code> (VARCHAR2): The new name for the team.</li>
+<li><code>p_is_active</code> (INTEGER): The new active status for the team.</li>
+<li><code>p_jersey_colour</code> (VARCHAR2): The new jersey colour for the team.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Output parameter for potential error codes.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: The team's record is updated. Success or failure is indicated by <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No team found with the provided ID.</li>
+<li><code>-3</code>: Data type/format mismatch.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">BEGIN</span>
+  spTeamsUpdate(<span class="hljs-number">210</span>, <span class="hljs-string">'Lions'</span>, <span class="hljs-number">1</span>, <span class="hljs-string">'Blue'</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="spteamsdelete"></a>
+<h4 id="spteamsdelete">spTeamsDelete</h4>
+<ul>
+<li><strong>Purpose</strong>: Deletes a team from the TEAMS table based on the provided team ID.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_team_id</code> (INTEGER): The ID of the team to be deleted.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Output parameter for potential error codes.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: The specified team's record is deleted. Success or failure is indicated by <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No team found with the provided ID.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_error_code <span class="hljs-built_in">INTEGER</span>;
+<span class="hljs-keyword">BEGIN</span>
+  spTeamsDelete(<span class="hljs-number">210</span>, v_error_code);
+  <span class="hljs-comment">-- Handle error based on v_error_code</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="spteamsselect"></a>
+<h4 id="spteamsselect">spTeamsSelect</h4>
+<ul>
+<li><strong>Purpose</strong>: Selects and returns details of a team from the TEAMS table based on their ID.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_team_id</code> (INTEGER): The ID of the team to be selected.</li>
+<li><code>p_team_name</code> (OUT, VARCHAR2): Output parameter for the team's name.</li>
+<li><code>p_is_active</code> (OUT, INTEGER): Output parameter indicating whether the team is active.</li>
+<li><code>p_jersey_colour</code> (OUT, VARCHAR2): Output parameter for the team's jersey colour.</li>
+<li><code>p_error_code</code> (OUT, INTEGER): Output parameter for potential error codes.</li>
+</ul>
+</li>
+<li><strong>Expected Output</strong>: Team details are returned in the output parameters. Success or failure is indicated by <code>p_error_code</code>.</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>-1</code>: No team found with the provided ID.</li>
+<li><code>-2</code>: Multiple teams found with the provided ID.</li>
+<li><code>-4</code>: Generic/unexpected error.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  v_team_name <span class="hljs-built_in">VARCHAR2</span>(<span class="hljs-number">100</span>);
+  v_is_active INTEGER;
+  v_jersey_colour VARCHAR2(100);
+  v_error_code INTEGER;
+<span class="hljs-keyword">BEGIN</span>
+  spTeamsSelect(<span class="hljs-number">210</span>, v_team_name, v_is_active, v_jersey_colour, v_error_code);
+  <span class="hljs-comment">-- Handle error and use output parameters</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<hr>
+<!-- TOC --><a name="general-functions"></a>
+<h3 id="general-functions">General Functions</h3>
+<!-- TOC --><a name="fnvalidateplayerandteam"></a>
+<h4 id="fnvalidateplayerandteam">fnValidatePlayerAndTeam</h4>
+<ul>
+<li><strong>Purpose</strong>: Validates the existence of a player and a team in the database.</li>
+<li><strong>Input Parameters</strong>:
+<ul>
+<li><code>p_player_id</code> (INTEGER): The ID of the player to validate.</li>
+<li><code>p_team_id</code> (INTEGER): The ID of the team to validate.</li>
+</ul>
+</li>
+<li><strong>Returns</strong>: <code>BOOLEAN</code> value. <code>TRUE</code> if both the player and the team exist, <code>FALSE</code> otherwise.</li>
+<li><strong>Description</strong>:
+<ul>
+<li>The function checks the existence of a player and a team based on the provided IDs.</li>
+<li>It performs a count operation on the <code>PLAYERS</code> and <code>TEAMS</code> tables to verify existence.</li>
+<li>Ensures that there is only one record for each ID to prevent duplicates.</li>
+</ul>
+</li>
+<li><strong>Example</strong>:<pre class="hljs"><code><div><span class="hljs-keyword">DECLARE</span>
+  player_exists <span class="hljs-built_in">BOOLEAN</span>;
+<span class="hljs-keyword">BEGIN</span>
+  player_exists := fnValidatePlayerAndTeam(<span class="hljs-number">101</span>, <span class="hljs-number">201</span>);
+  <span class="hljs-comment">-- Use player_exists to decide further action</span>
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+</li>
+</ul>
+<!-- TOC --><a name="procedure-q2-spplayersselectall-sprostersselectall-spteamsselectall"></a>
+<h2 id="procedure-q2-spplayersselectall-sprostersselectall-spteamsselectall">Procedure Q2: spPlayersSelectAll, spRostersSelectAll, spTeamsSelectAll</h2>
 <ul>
 <li><strong>Purpose</strong>: Outputs all records from the respective tables (PLAYERS, ROSTERS, TEAMS) using <code>DBMS_OUTPUT</code>.</li>
 <li><strong>Input Parameters</strong>: None.</li>
@@ -416,7 +840,8 @@ code {
 </div></code></pre>
 </li>
 </ul>
-<h4 id="procedure-q3-spplayersselectall-sprostersselectall-spteamsselectall-cursor-version">Procedure Q3: spPlayersSelectAll, spRostersSelectAll, spTeamsSelectAll (Cursor Version)</h4>
+<!-- TOC --><a name="procedure-q3-spplayersselectall-sprostersselectall-spteamsselectall-cursor-version"></a>
+<h2 id="procedure-q3-spplayersselectall-sprostersselectall-spteamsselectall-cursor-version">Procedure Q3: spPlayersSelectAll, spRostersSelectAll, spTeamsSelectAll (Cursor Version)</h2>
 <ul>
 <li><strong>Purpose</strong>: Returns a cursor with all records from the respective tables.</li>
 <li><strong>Input Parameters</strong>: None.</li>
@@ -438,13 +863,15 @@ code {
 </div></code></pre>
 </li>
 </ul>
-<h4 id="procedure-q4-vwplayerrosters-view-creation">Procedure Q4: vwPlayerRosters (View Creation)</h4>
+<!-- TOC --><a name="procedure-q4-vwplayerrosters-view-creation"></a>
+<h2 id="procedure-q4-vwplayerrosters-view-creation">Procedure Q4: vwPlayerRosters (View Creation)</h2>
 <ul>
 <li><strong>Purpose</strong>: Creates a view combining players, rosters, and teams data.</li>
 <li><strong>Input Parameters</strong>: None (View creation).</li>
 <li><strong>Expected Output</strong>: A new view <code>vwPlayerRosters</code> is created.</li>
 </ul>
-<h4 id="procedure-q5-spteamrosterbyid">Procedure Q5: spTeamRosterByID</h4>
+<!-- TOC --><a name="procedure-q5-spteamrosterbyid"></a>
+<h2 id="procedure-q5-spteamrosterbyid">Procedure Q5: spTeamRosterByID</h2>
 <ul>
 <li><strong>Purpose</strong>: Displays the team roster for a specified team ID.</li>
 <li><strong>Input Parameters</strong>: <code>v_teamid</code> (NUMBER): Team ID to query.</li>
@@ -456,7 +883,8 @@ code {
 </div></code></pre>
 </li>
 </ul>
-<h4 id="procedure-q6-spteamrosterbyname">Procedure Q6: spTeamRosterByName</h4>
+<!-- TOC --><a name="procedure-q6-spteamrosterbyname"></a>
+<h2 id="procedure-q6-spteamrosterbyname">Procedure Q6: spTeamRosterByName</h2>
 <ul>
 <li><strong>Purpose</strong>: Searches and displays team roster by a partial/full team name.</li>
 <li><strong>Input Parameters</strong>: <code>p_team_name</code> (VARCHAR2): Partial or full team name.</li>
@@ -474,13 +902,15 @@ code {
 </div></code></pre>
 </li>
 </ul>
-<h4 id="procedure-q7-vwteamsnumplayers-view-creation">Procedure Q7: vwTeamsNumPlayers (View Creation)</h4>
+<!-- TOC --><a name="procedure-q7-vwteamsnumplayers-view-creation"></a>
+<h2 id="procedure-q7-vwteamsnumplayers-view-creation">Procedure Q7: vwTeamsNumPlayers (View Creation)</h2>
 <ul>
 <li><strong>Purpose</strong>: Creates a view that lists teams along with the number of active players.</li>
 <li><strong>Input Parameters</strong>: None (View creation).</li>
 <li><strong>Expected Output</strong>: A new view <code>vwTeamsNumPlayers</code> is created.</li>
 </ul>
-<h4 id="function-q8-fncnumplayersbyteamid">Function Q8: fncNumPlayersByTeamID</h4>
+<!-- TOC --><a name="function-q8-fncnumplayersbyteamid"></a>
+<h2 id="function-q8-fncnumplayersbyteamid">Function Q8: fncNumPlayersByTeamID</h2>
 <ul>
 <li><strong>Purpose</strong>: Retrieves the number of active players in a team based on team ID.</li>
 <li><strong>Input Parameters</strong>: <code>p_team_id</code> (NUMBER): Team ID.</li>
@@ -500,13 +930,15 @@ code {
 <span class="hljs-comment">-- Display or use v_num_players</span>
 <span class="hljs-keyword">END</span>;
 </div></code></pre>
-<h4 id="procedure-q9-vwschedule-view-creation">Procedure Q9: vwSchedule (View Creation)</h4>
+<!-- TOC --><a name="procedure-q9-vwschedule-view-creation"></a>
+<h2 id="procedure-q9-vwschedule-view-creation">Procedure Q9: vwSchedule (View Creation)</h2>
 <ul>
 <li><strong>Purpose</strong>: Creates a view for game schedules.</li>
 <li><strong>Input Parameters</strong>: None (View creation).</li>
 <li><strong>Expected Output</strong>: A new view <code>vwSchedule</code> is created.</li>
 </ul>
-<h4 id="procedure-q10-spschedupcominggames">Procedure Q10: spSchedUpcomingGames</h4>
+<!-- TOC --><a name="procedure-q10-spschedupcominggames"></a>
+<h2 id="procedure-q10-spschedupcominggames">Procedure Q10: spSchedUpcomingGames</h2>
 <ul>
 <li><strong>Purpose</strong>: Retrieves and displays upcoming games within 'n' days.</li>
 <li><strong>Input Parameters</strong>: <code>n</code> (INTEGER): Number of days ahead to retrieve games.</li>
@@ -531,7 +963,8 @@ code {
   spSchedUpcomingGames(<span class="hljs-number">7</span>); <span class="hljs-comment">-- Replace with the number of days ahead</span>
 <span class="hljs-keyword">END</span>;
 </div></code></pre>
-<h4 id="procedure-q11-spschedpastgames">Procedure Q11: spSchedPastGames</h4>
+<!-- TOC --><a name="procedure-q11-spschedpastgames"></a>
+<h2 id="procedure-q11-spschedpastgames">Procedure Q11: spSchedPastGames</h2>
 <ul>
 <li><strong>Purpose</strong>: Displays games played in the past 'n' days.</li>
 <li><strong>Input Parameters</strong>: <code>n</code> (NUMBER): Number of past days to query.</li>
@@ -556,7 +989,8 @@ code {
 </div></code></pre>
 </li>
 </ul>
-<h4 id="procedure-q12-sprunstandings">Procedure Q12: spRunStandings</h4>
+<!-- TOC --><a name="procedure-q12-sprunstandings"></a>
+<h2 id="procedure-q12-sprunstandings">Procedure Q12: spRunStandings</h2>
 <ul>
 <li><strong>Purpose</strong>: Updates the <code>tempStandings</code> table with current standings data.</li>
 <li><strong>Input Parameters</strong>: None.</li>
@@ -568,7 +1002,8 @@ code {
 </div></code></pre>
 </li>
 </ul>
-<h4 id="trigger-q13-trrunstandings">Trigger Q13: trRunStandings</h4>
+<!-- TOC --><a name="trigger-q13-trrunstandings"></a>
+<h2 id="trigger-q13-trrunstandings">Trigger Q13: trRunStandings</h2>
 <ul>
 <li><strong>Purpose</strong>: Automates the execution of <code>spRunStandings</code> on updates in the games table.</li>
 <li><strong>Input Parameters</strong>: Triggered by update on games table.</li>
@@ -578,7 +1013,8 @@ code {
 </ul>
 <pre class="hljs"><code><div><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> tempStandings
 </div></code></pre>
-<h4 id="procedure-q14-spgetallstars">Procedure Q14: spGetAllStars</h4>
+<!-- TOC --><a name="procedure-q14-spgetallstars"></a>
+<h2 id="procedure-q14-spgetallstars">Procedure Q14: spGetAllStars</h2>
 <ul>
 <li><strong>Purpose</strong>: Identifies and displays the all-star lineup of players with the most goals for their team in the current season.</li>
 <li><strong>Input Parameters</strong>: None.</li>
