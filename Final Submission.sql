@@ -1235,10 +1235,7 @@ END;
 /
 
 -- Q13
-BEGIN
-    trRunStandings;
-END;
-/
+-- No execution code. You don't call triggers!
 
 -- Q14
 BEGIN
