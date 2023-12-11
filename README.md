@@ -8,4 +8,4 @@ All code written in accordance with the [Academic Integrity Policy](https://www.
 
 [Liam's video](#)
 
-[User Guide](userguide.md)
+[User Guide](UserGuide.md)
