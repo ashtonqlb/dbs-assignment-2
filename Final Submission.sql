@@ -616,69 +616,6 @@ EXCEPTION
 END;
 /
 
--- **************************************************************************************
--- Non-saved procedures to show receiving the data and outputting it to the script window
--- **************************************************************************************
-
--- PLAYERS
-DECLARE
-    v_cursor    SYS_REFCURSOR;
-    v_playerID  NUMBER;
-    v_regNum    NUMBER;
-    v_lastName  VARCHAR2(50);
-    v_firstName VARCHAR2(50);
-    v_isActive  NUMBER;
-BEGIN
-    spPlayersSelectAll(v_cursor);
-    LOOP
-        FETCH v_cursor INTO v_playerID, v_regNum, v_lastName, v_firstName, v_isActive;
-        EXIT WHEN v_cursor%NOTFOUND;
-        DBMS_OUTPUT.PUT_LINE(v_playerID || ' ' || v_regNum || ' ' || v_lastName || ' ' || v_firstName || ' ' || v_isActive);
-    END LOOP;
-
-    CLOSE v_cursor;
-END;
-/
-
--- ROSTERS
-DECLARE
-    v_cursor    SYS_REFCURSOR;
-    v_rosterID  NUMBER;
-    v_playerID  NUMBER;
-    v_teamID    NUMBER;
-    v_isActive  NUMBER;
-    v_jerseyNum NUMBER;
-BEGIN
-    spRostersSelectAll(v_cursor);
-    LOOP
-        FETCH v_cursor INTO v_rosterID, v_playerID, v_teamID, v_isActive, v_jerseyNum;
-        EXIT WHEN v_cursor%NOTFOUND;
-        DBMS_OUTPUT.PUT_LINE(v_rosterID || ' ' || v_playerID || ' ' || v_teamID || ' ' || v_isActive || ' ' || v_jerseyNum);
-    END LOOP;
-
-    CLOSE v_cursor;
-END;
-/
-
--- TEAMS
-DECLARE
-    v_cursor     SYS_REFCURSOR;
-    v_teamID     NUMBER;
-    v_teamName   VARCHAR2(50);
-    v_isActive   NUMBER;
-    v_jerseyNums VARCHAR2(50);
-BEGIN
-    spTeamsSelectAll(v_cursor);
-    LOOP
-        FETCH v_cursor INTO v_teamID, v_teamName, v_isActive, v_jerseyNums;
-        EXIT WHEN v_cursor%NOTFOUND;
-        DBMS_OUTPUT.PUT_LINE(v_teamID || ' ' || v_teamName || ' ' || v_isActive || ' ' || v_jerseyNums);
-    END LOOP;
-
-    CLOSE v_cursor;
-END;
-/
-
 -- Q4
 CREATE OR REPLACE VIEW vwPlayerRosters AS
     SELECT
@@ -721,21 +658,8 @@ EXCEPTION
 END;
 /
 
-/**
- * Q6
- * Executes the 'spTeamRosterByName' stored procedure to fetch and display the team roster.
- * This procedure searches the 'vwPlayerRosters' view for a team that includes the specified
- * string in its name and prints out the roster to DBMS_OUTPUT.
- *
- * @param p_team_name A partial or full team name to search for within the team names.
- * 
- * @note It is case-insensitive.
- * 
- */
 
--- DBS311NEE Assignment 2 - Task 6
--- Author: Ashton Lunken (abennet@myseneca.ca)
-
+-- Q6
 /**
  * Executes the 'spTeamRosterByName' stored procedure to fetch and display the team roster.
  * This procedure searches the 'vwPlayerRosters' view for a team that includes the specified
@@ -1139,9 +1063,11 @@ EXCEPTION
 END spGetAllStars;
 /
 
--- Sample execution code
-
+---------------------------------------------                                             -----------------------------------------------
+---------------------------------------------            SAMPLE EXECUTION CODE            -----------------------------------------------
+---------------------------------------------             (it works just okay)             -----------------------------------------------
 -- Q1
+-- Seeing how beefy Q1 is and how much of the logic is reused, I simply provided the first table's worth of execution code. It's almost exactly the same between all three - AL
 DECLARE
     v_player_id INTEGER := 504;
     v_reg_number VARCHAR2(100) := '12345';
@@ -1189,28 +1115,82 @@ EXCEPTION
 END;
 /
 
+-- Q2
+-- There's no execution code here since we overwrite it with a better version immediately in Question 3. So, just use your imagination. Heartbreaking, I know.
+
+-- Q3
+DECLARE
+    v_cursor    SYS_REFCURSOR;
+    v_playerID  NUMBER;
+    v_regNum    NUMBER;
+    v_lastName  VARCHAR2(50);
+    v_firstName VARCHAR2(50);
+    v_isActive  NUMBER;
 BEGIN
-    spteamrosterbyid(210); -- Q?
-    spSchedUpcomingGames(7); -- Q?
-    spSchedPastGames(30); -- Q?
+    spPlayersSelectAll(v_cursor);
+    LOOP
+        FETCH v_cursor INTO v_playerID, v_regNum, v_lastName, v_firstName, v_isActive;
+        EXIT WHEN v_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_playerID || ' ' || v_regNum || ' ' || v_lastName || ' ' || v_firstName || ' ' || v_isActive);
+    END LOOP;
+
+    CLOSE v_cursor;
 END;
 /
 
-SELECT
-    *
-FROM
-    vwTeamsNumPlayers;
+DECLARE
+    v_cursor    SYS_REFCURSOR;
+    v_rosterID  NUMBER;
+    v_playerID  NUMBER;
+    v_teamID    NUMBER;
+    v_isActive  NUMBER;
+    v_jerseyNum NUMBER;
+BEGIN
+    spRostersSelectAll(v_cursor);
+    LOOP
+        FETCH v_cursor INTO v_rosterID, v_playerID, v_teamID, v_isActive, v_jerseyNum;
+        EXIT WHEN v_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_rosterID || ' ' || v_playerID || ' ' || v_teamID || ' ' || v_isActive || ' ' || v_jerseyNum);
+    END LOOP;
 
-SELECT
-    fncNumPlayersByTeamID(216)
-FROM
-    DUAL;
+    CLOSE v_cursor;
+END;
+/
 
-SELECT
-    *
-FROM
-    vwSchedule;
+DECLARE
+    v_cursor     SYS_REFCURSOR;
+    v_teamID     NUMBER;
+    v_teamName   VARCHAR2(50);
+    v_isActive   NUMBER;
+    v_jerseyNums VARCHAR2(50);
+BEGIN
+    spTeamsSelectAll(v_cursor);
+    LOOP
+        FETCH v_cursor INTO v_teamID, v_teamName, v_isActive, v_jerseyNums;
+        EXIT WHEN v_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(v_teamID || ' ' || v_teamName || ' ' || v_isActive || ' ' || v_jerseyNums);
+    END LOOP;
 
+    CLOSE v_cursor;
+END;
+/
+
+-- Q4
+BEGIN
+    SELECT
+        *
+    FROM
+        vwPlayerRosters
+END;
+/
+
+-- Q5
+BEGIN
+    spTeamRosterByID(210);
+END;
+/
+
+-- Q6
 DECLARE
     error integer;
 BEGIN
@@ -1218,6 +1198,52 @@ BEGIN
 END;
 /
 
+-- Q7
+SELECT
+    *
+FROM
+    vwTeamsNumPlayers;
+
+-- Q8
+SELECT
+    fncNumPlayersByTeamID(216)
+FROM
+    DUAL;
+
+-- Q9
+SELECT
+    *
+FROM
+    vwSchedule;
+
+-- Q10
+BEGIN 
+    spSchedUpcomingGames(7);
+END;
+/
+
+-- Q11
+BEGIN 
+    spSchedPastGames(30);
+END;
+/
+
+-- Q12
+BEGIN 
+    spRunStandings();
+END;
+/
+
+-- Q13
+BEGIN
+    trRunStandings;
+END;
+/
+
+-- Q14
 BEGIN
     spGetAllStars;
 END;
+/
+
+-- That's all folks!
