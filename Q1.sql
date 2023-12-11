@@ -232,7 +232,7 @@ BEGIN
 
     v_last_name := 'Smith';
     spPlayersUpdate(v_player_id, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL THEN
         DBMS_OUTPUT.PUT_LINE('Updated player with ID ' || v_player_id || '.');
     ELSE
         DBMS_OUTPUT.PUT_LINE('PLAYERS: Error in update operation: ' || v_error_code);
@@ -240,7 +240,7 @@ BEGIN
     END IF;
 
     spPlayersSelect(v_player_id, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL THEN
         DBMS_OUTPUT.PUT_LINE('Selected player details: Reg Number=' || v_reg_number || ', Name=' || v_first_name || ' ' || v_last_name);
     ELSE
         DBMS_OUTPUT.PUT_LINE('PLAYERS: Error in select operation: ' || v_error_code);
@@ -248,7 +248,7 @@ BEGIN
     END IF;
 
     spPlayersDelete(v_player_id, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL THEN
         DBMS_OUTPUT.PUT_LINE('Deleted player with ID ' || v_player_id || '.');
     ELSE
         DBMS_OUTPUT.PUT_LINE('PLAYERS: Error in delete operation: ' || v_error_code);
@@ -424,7 +424,7 @@ CREATE OR REPLACE PROCEDURE spTeamsTestOperations IS
     v_error_code INTEGER;
 BEGIN 
     spTeamsInsert(v_team_id, v_team_name, v_is_active, v_jersey_colour, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Inserted new team');
     ELSE
         DBMS_OUTPUT.PUT_LINE('TEAMS: Error in insert operation: ' || v_error_code);
@@ -433,21 +433,21 @@ BEGIN
     v_team_name := 'Tests';
     v_jersey_colour := 'Pink';
     spTeamsUpdate(v_team_id, v_team_name, v_is_active, v_jersey_colour, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Updated team: ' || v_team_id || '.');
     ELSE
         DBMS_OUTPUT.PUT_LINE('TEAMS: Error in update operation: ' || v_error_code);
     END IF;
 
     spTeamsSelect(v_team_id, v_team_name, v_is_active, v_jersey_colour, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Selected team: ' || v_jersey_colour || ' ' || v_team_name || '.');
     ELSE
         DBMS_OUTPUT.PUT_LINE('TEAMS: Error in select operation: ' || v_error_code);
     END IF;
     
     spTeamsDelete(v_team_id, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Deleted team');
     ELSE
         DBMS_OUTPUT.PUT_LINE('TEAMS: Error in delete operation: ' || v_error_code);
@@ -674,7 +674,7 @@ CREATE OR REPLACE PROCEDURE spRostersTestOperations IS
     v_error_code INTEGER;
 BEGIN
     spRostersInsert(v_roster_id, v_player_id, v_team_id, v_is_active, v_jersey_number, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Inserted new team');
     ELSE
         DBMS_OUTPUT.PUT_LINE('ROSTERS: Error in insert operation: ' || v_error_code);
@@ -682,21 +682,21 @@ BEGIN
 
     v_jersey_number := 11;
     spRostersUpdate(v_roster_id, v_player_id, v_team_id, v_is_active, v_jersey_number, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Updated roster: ' || v_roster_id || ' with jersey number ' || v_jersey_number || '.');
     ELSE
         DBMS_OUTPUT.PUT_LINE('ROSTERS: Error in update operation: ' || v_error_code);
     END IF;
 
     spRostersSelect(v_roster_id, v_player_id, v_team_id, v_is_active, v_jersey_number, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Selected roster: ' || v_roster_id );
     ELSE
         DBMS_OUTPUT.PUT_LINE('ROSTERS: Error in select operation: ' || v_error_code);
     END IF;
 
     spRostersDelete(v_roster_id, v_error_code);
-    IF v_error_code = 0 THEN
+    IF v_error_code IS NULL  THEN
         DBMS_OUTPUT.PUT_LINE('Deleted roster');
     ELSE
         DBMS_OUTPUT.PUT_LINE('ROSTERS: Error in delete operation: ' || v_error_code);

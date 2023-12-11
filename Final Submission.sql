@@ -55,34 +55,20 @@ CREATE OR REPLACE PROCEDURE spPlayersInsert (
     v_max_id INTEGER := 0;
 BEGIN
     IF p_player_id IS NULL THEN
-        SELECT
-            COALESCE(MAX(playerid), 0) + 1 INTO v_max_id
-        FROM
-            PLAYERS;
+        SELECT COALESCE(MAX(playerid), 0) + 1 INTO v_max_id FROM PLAYERS;
     ELSE
         v_max_id := p_player_id;
     END IF;
 
-    INSERT INTO PLAYERS (
-        playerid,
-        regnumber,
-        lastname,
-        firstname,
-        isactive
-    ) VALUES (
-        v_max_id,
-        p_reg_number,
-        p_last_name,
-        p_first_name,
-        p_is_active
-    );
-EXCEPTION
-    WHEN DUP_VAL_ON_INDEX THEN
-        p_error_code := -2;
-    WHEN VALUE_ERROR THEN
-        p_error_code := -3;
-    WHEN OTHERS THEN
-        p_error_code := -4;
+    INSERT INTO PLAYERS (playerid, regnumber, lastname, firstname, isactive)
+    VALUES (v_max_id, p_reg_number, p_last_name, p_first_name, p_is_active);
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+            p_error_code := -2;
+        WHEN VALUE_ERROR THEN
+            p_error_code := -3;
+        WHEN OTHERS THEN
+            p_error_code := -4;
 END;
 /
 
@@ -108,24 +94,23 @@ CREATE OR REPLACE PROCEDURE spPlayersUpdate (
     p_first_name IN VARCHAR2,
     p_is_active IN INTEGER,
     p_error_code OUT INTEGER
-) IS
-BEGIN
+) IS BEGIN
     UPDATE PLAYERS
-    SET
-        regnumber = p_reg_number,
-        lastname = p_last_name,
-        firstname = p_first_name,
-        isactive = p_is_active
-    WHERE
-        playerid = p_player_id;
+    SET   regnumber = p_reg_number,
+          lastname  = p_last_name,
+          firstname = p_first_name,
+          isactive  = p_is_active
+    WHERE playerid  = p_player_id;
+
     IF SQL%ROWCOUNT = 0 THEN
         p_error_code := -1;
     END IF;
-EXCEPTION
-    WHEN VALUE_ERROR THEN
-        p_error_code := -3;
-    WHEN OTHERS THEN
-        p_error_code := -4;
+
+    EXCEPTION
+        WHEN VALUE_ERROR THEN
+            p_error_code := -3;
+        WHEN OTHERS THEN
+            p_error_code := -4;
 END;
 /
 
@@ -145,12 +130,12 @@ CREATE OR REPLACE PROCEDURE spPlayersDelete (
     p_error_code OUT INTEGER
 ) IS
 BEGIN
-    DELETE FROM PLAYERS
-    WHERE
-        playerid = p_player_id;
+    DELETE FROM PLAYERS WHERE playerid = p_player_id;
+
     IF SQL%ROWCOUNT = 0 THEN
-        p_error_code := -1;
+        p_error_code := -1; 
     END IF;
+
 EXCEPTION
     WHEN OTHERS THEN
         p_error_code := -4;
@@ -182,20 +167,332 @@ CREATE OR REPLACE PROCEDURE spPlayersSelect (
     p_first_name OUT VARCHAR2,
     p_is_active OUT INTEGER,
     p_error_code OUT INTEGER
-) IS
+) IS BEGIN
+    SELECT regnumber, lastname, firstname, isactive INTO p_reg_number, p_last_name, p_first_name, p_is_active
+    FROM PLAYERS WHERE playerid = p_player_id;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        p_error_code := -1;
+    WHEN TOO_MANY_ROWS THEN
+        p_error_code := -2;
+    WHEN OTHERS THEN
+        p_error_code := -4;
+END;
+/
+
+/**
+ * Inserts a new team into the TEAMS table.
+ * If the provided team ID is NULL, it automatically generates a new ID.
+ *
+ * @param p_team_id        The ID of the team (optional). If NULL, a new ID is generated.
+ * @param p_team_name      The name of the team.
+ * @param p_is_active      Indicates whether the team is active (1) or not (0).
+ * @param p_jersey_colour  The colour of the team's jersey.
+ * @param p_error_code     (OUT) Indicate the type of any potential errors. See table.
+ */
+
+CREATE OR REPLACE PROCEDURE spTeamsInsert (
+    p_team_id IN INTEGER DEFAULT NULL,
+    p_team_name IN VARCHAR2,
+    p_is_active IN INTEGER,
+    p_jersey_colour IN VARCHAR2,
+    p_error_code OUT INTEGER
+) IS 
+    v_max_id INTEGER := 0;
+BEGIN 
+    IF p_team_id IS NULL THEN
+        SELECT COALESCE(MAX(teamid), 0) + 1 INTO v_max_id FROM TEAMS;
+    ELSE
+        v_max_id := p_team_id;
+    END IF;
+
+    INSERT INTO TEAMS (teamid, teamname, isactive, jerseycolour)
+    VALUES (p_team_id, p_team_name, p_is_active, p_jersey_colour);
+    EXCEPTION
+        WHEN DUP_VAL_ON_INDEX THEN
+            p_error_code := -2;
+        WHEN VALUE_ERROR THEN
+            p_error_code := -3;
+        WHEN OTHERS THEN
+            p_error_code := -4;
+END;
+/
+
+/**
+ * Updates an existing team's details in the TEAMS table.
+ *
+ * @param p_team_id        The ID of the team to be updated.
+ * @param p_team_name      The new name for the team.
+ * @param p_is_active      The new active status for the team (1 for active, 0 for inactive).
+ * @param p_jersey_colour  The new jersey colour for the team.
+ * @param p_error_code     (OUT) Indicate the type of any potential errors. See table.
+ *
+ * @note If no team is found with the provided ID, an error code is returned.
+ */
+
+CREATE OR REPLACE PROCEDURE spTeamsUpdate (
+    p_team_id IN INTEGER DEFAULT NULL,
+    p_team_name IN VARCHAR2,
+    p_is_active IN INTEGER,
+    p_jersey_colour IN VARCHAR2,
+    p_error_code OUT INTEGER
+) IS BEGIN
+    UPDATE TEAMS
+    SET   teamid = p_team_id,
+          teamname  = p_team_name,
+          isactive = p_is_active,
+          jerseycolour  = p_jersey_colour
+    WHERE teamid  = p_team_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        p_error_code := -1;
+    END IF;
+
+    EXCEPTION
+        WHEN VALUE_ERROR THEN
+            p_error_code := -3;
+        WHEN OTHERS THEN
+            p_error_code := -4;
+END;
+/
+
+/**
+ * Deletes a team from the TEAMS table based on the provided team ID.
+ *
+ * @param p_team_id    The ID of the team to be deleted.
+ * @param p_error_code (OUT) Indicate the type of any potential errors. See table.
+ *
+ * @note If no team is found with the provided ID, an error code is returned.
+ */
+
+CREATE OR REPLACE PROCEDURE spTeamsDelete (
+    p_team_id IN INTEGER,
+    p_error_code OUT INTEGER
+) IS BEGIN
+    DELETE FROM TEAMS WHERE teamid = p_team_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        p_error_code := -1; 
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        p_error_code := -4;
+END;
+/
+
+/**
+ * Selects and returns details of a team from the TEAMS table based on the provided team ID.
+ *
+ * @param p_team_id        The ID of the team to be selected.
+ * @param p_team_name      (OUT) The name of the team.
+ * @param p_is_active      (OUT) Indicates whether the team is active (1) or not (0).
+ * @param p_jersey_colour  (OUT) The jersey colour of the team.
+ * @param p_error_code     (OUT) Indicate the type of any potential errors. See table.
+ *
+ * @note If no team is found with the provided ID, an error code is returned.
+ */
+
+CREATE OR REPLACE PROCEDURE spTeamsSelect (
+    p_team_id IN INTEGER,
+    p_team_name OUT VARCHAR2,
+    p_is_active OUT INTEGER,
+    p_jersey_colour OUT VARCHAR2,
+    p_error_code OUT INTEGER
+) IS BEGIN 
+
+SELECT teamname, isactive, jerseycolour INTO p_team_name, p_is_active, p_jersey_colour
+    FROM TEAMS WHERE teamid = p_team_id;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        p_error_code := -1;
+    WHEN TOO_MANY_ROWS THEN
+        p_error_code := -2;
+    WHEN OTHERS THEN
+        p_error_code := -4;
+END;
+/
+
+/**
+ * Validates the existence of a player and a team in the database.
+ * 
+ * @param p_player_id  The ID of the player to validate.
+ * @param p_team_id    The ID of the team to validate.
+ * @return Returns TRUE if both the player and the team exist and FALSE otherwise.
+ */
+
+CREATE OR REPLACE FUNCTION fnValidatePlayerAndTeam (
+    p_player_id IN INTEGER,
+    p_team_id IN INTEGER
+) RETURN BOOLEAN IS
+    v_player_exists INTEGER;
+    v_team_exists INTEGER;
 BEGIN
-    SELECT
-        regnumber,
-        lastname,
-        firstname,
-        isactive INTO p_reg_number,
-        p_last_name,
-        p_first_name,
-        p_is_active
-    FROM
-        PLAYERS
-    WHERE
-        playerid = p_player_id;
+    SELECT COUNT(*) INTO v_player_exists FROM PLAYERS WHERE playerid = p_player_id;
+
+    SELECT COUNT(*) INTO v_team_exists FROM TEAMS WHERE teamid = p_team_id;
+
+    RETURN (v_player_exists > 0 AND v_team_exists > 0 AND v_player_exists < 2 AND v_team_exists < 2);
+END fnValidatePlayerAndTeam;
+/
+
+/**
+ * Inserts a new roster record into the ROSTERS table.
+ *
+ * @param p_roster_id      The ID of the roster (optional). If NULL, a new ID is generated.
+ * @param p_player_id      The ID of the player in the roster.
+ * @param p_team_id        The ID of the team in the roster.
+ * @param p_is_active      Indicates whether the roster is active (1) or not (0).
+ * @param p_jersey_number  The jersey number of the player in the roster.
+ * @param p_error_code     (OUT) Error code indicating the status of the operation.
+ *
+ * @exception DUP_VAL_ON_INDEX Raised when a duplicate roster ID is encountered.
+ * @exception VALUE_ERROR Raised when there is a mismatch in data types or formats.
+ * @exception OTHERS Catches all other exceptions and displays the error message.
+ */
+
+CREATE OR REPLACE PROCEDURE spRostersInsert (
+    p_roster_id IN INTEGER DEFAULT NULL,
+    p_player_id IN INTEGER,
+    p_team_id IN INTEGER,
+    p_is_active IN INTEGER,
+    p_jersey_number IN INTEGER,
+    p_error_code OUT INTEGER
+) IS
+    v_max_id INTEGER := 0;
+BEGIN 
+    IF p_roster_id IS NULL THEN
+        SELECT COALESCE(MAX(rosterid), 0) + 1 INTO v_max_id FROM ROSTERS;
+    ELSE
+        v_max_id := p_roster_id;
+    END IF;
+
+    IF fnValidatePlayerAndTeam(p_player_id, p_team_id) THEN
+        INSERT INTO ROSTERS (rosterid, playerid, teamid, isactive, jerseynumber)
+        VALUES (v_max_id, p_player_id, p_team_id, p_is_active, p_jersey_number);
+    ELSE
+        p_error_code := -1;
+    END IF;
+
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        p_error_code := -2;
+    WHEN VALUE_ERROR THEN
+        p_error_code := -3;
+    WHEN OTHERS THEN
+        p_error_code := -4;
+END spRostersInsert;
+/
+
+/**
+ * Updates an existing roster record in the ROSTERS table.
+ *
+ * @param p_roster_id      The ID of the roster to be updated.
+ * @param p_player_id      The new player ID for the roster.
+ * @param p_team_id        The new team ID for the roster.
+ * @param p_is_active      The new active status of the roster (1 for active, 0 for inactive).
+ * @param p_jersey_number  The new jersey number of the player in the roster.
+ * @param p_error_code     (OUT) Error code indicating the status of the operation.
+ *
+ * @note If no roster is found with the provided ID, an error code is returned.
+ *
+ * @exception VALUE_ERROR Raised when there is a mismatch in data types or formats.
+ * @exception OTHERS Catches all other exceptions and displays the error message.
+ */
+
+CREATE OR REPLACE PROCEDURE spRostersUpdate (
+    p_roster_id IN INTEGER,
+    p_player_id IN INTEGER,
+    p_team_id IN INTEGER,
+    p_is_active IN INTEGER,
+    p_jersey_number IN INTEGER,
+    p_error_code OUT INTEGER
+) IS 
+BEGIN    
+    IF fnValidatePlayerAndTeam(p_player_id, p_team_id) THEN
+        UPDATE ROSTERS
+            SET playerid = p_player_id,
+                teamid = p_team_id,
+                isactive = p_is_active,
+                jerseynumber = p_jersey_number
+            WHERE rosterid = p_roster_id;
+
+        IF SQL%ROWCOUNT = 0 THEN
+            p_error_code := -1;
+        ELSE
+            p_error_code := 0;
+        END IF;
+    ELSE
+        p_error_code := -1;
+    END IF;
+EXCEPTION
+    WHEN VALUE_ERROR THEN
+        p_error_code := -3;
+    WHEN OTHERS THEN
+        p_error_code := -4;
+END spRostersUpdate;
+/
+
+/**
+ * Deletes a roster record from the ROSTERS table based on the provided roster ID.
+ *
+ * @param p_roster_id    The ID of the roster to be deleted.
+ * @param p_error_code   (OUT) Error code indicating the status of the operation.
+ *
+ * @note If no roster is found with the provided ID, an error code is returned.
+ *
+ * @exception OTHERS Catches all exceptions and displays the error message.
+ */
+
+
+CREATE OR REPLACE PROCEDURE spRostersDelete (
+    p_roster_id IN INTEGER,
+    p_error_code OUT INTEGER
+) 
+IS BEGIN
+    DELETE FROM ROSTERS WHERE rosterid = p_roster_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        p_error_code := -1; 
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        p_error_code := -4;
+END spRostersDelete;
+/
+
+/**
+ * Selects and returns details of a roster from the ROSTERS table based on the provided roster ID.
+ *
+ * @param p_roster_id        The ID of the roster to be selected.
+ * @param p_player_id        (OUT) The player ID in the roster.
+ * @param p_team_id          (OUT) The team ID in the roster.
+ * @param p_is_active        (OUT) Indicates whether the roster is active (1) or not (0).
+ * @param p_jersey_number    (OUT) The jersey number of the player in the roster.
+ * @param p_error_code       (OUT) Error code indicating the status of the operation.
+ *
+ * @note If no roster is found with the provided ID, an error code is returned.
+ *
+ * @exception NO_DATA_FOUND Raised when no roster is found with the provided ID.
+ * @exception TOO_MANY_ROWS Raised when multiple rosters are found with the provided ID.
+ * @exception OTHERS Catches all other exceptions and displays the error message.
+ */
+
+CREATE OR REPLACE PROCEDURE spRostersSelect (
+    p_roster_id IN INTEGER,
+    p_player_id OUT INTEGER,
+    p_team_id OUT INTEGER,
+    p_is_active OUT INTEGER,
+    p_jersey_number OUT INTEGER,
+    p_error_code OUT INTEGER
+) IS BEGIN 
+
+SELECT playerid, teamid, isactive, jerseynumber INTO p_player_id, p_team_id, p_is_active, p_jersey_number
+    FROM ROSTERS WHERE rosterid = p_roster_id;
+
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         p_error_code := -1;
@@ -846,17 +1143,45 @@ END spGetAllStars;
 
 -- Q1
 DECLARE
-    v_reg_number VARCHAR2(50);
-    v_last_name  VARCHAR2(50);
-    v_first_name VARCHAR2(50);
-    v_is_active  INTEGER;
+    v_player_id INTEGER := 504;
+    v_reg_number VARCHAR2(100) := '12345';
+    v_last_name VARCHAR2(100)  := 'Doe';
+    v_first_name VARCHAR2(100) := 'John';
+    v_is_active INTEGER := 1;
     v_error_code INTEGER;
 BEGIN
-    spPlayersSelect(101, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
-    IF v_error_code = 0 THEN
-        DBMS_OUTPUT.PUT_LINE('Reg#: ' || v_reg_number || ', Last Name: ' || v_last_name || ', First Name: ' || v_first_name || ', Active: ' || v_is_active);
+
+    spPlayersInsert(v_player_id, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
+    IF v_error_code IS NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Inserted new player.');
     ELSE
-        DBMS_OUTPUT.PUT_LINE('Error: ' || v_error_code);
+        DBMS_OUTPUT.PUT_LINE('PLAYERS: Error in insert operation: ' || v_error_code);
+        RETURN;
+    END IF;
+
+    v_last_name := 'Smith';
+    spPlayersUpdate(v_player_id, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
+    IF v_error_code IS NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Updated player with ID ' || v_player_id || '.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('PLAYERS: Error in update operation: ' || v_error_code);
+        RETURN;
+    END IF;
+
+    spPlayersSelect(v_player_id, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
+    IF v_error_code IS NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Selected player details: Reg Number=' || v_reg_number || ', Name=' || v_first_name || ' ' || v_last_name);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('PLAYERS: Error in select operation: ' || v_error_code);
+        RETURN;
+    END IF;
+
+    spPlayersDelete(v_player_id, v_error_code);
+    IF v_error_code IS NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Deleted player with ID ' || v_player_id || '.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('PLAYERS: Error in delete operation: ' || v_error_code);
+        RETURN;
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
