@@ -1,9 +1,4 @@
-**TODO:**
-Add error checking to functions and add the expected error codes to this user guide.
-
----
-
-### User's Guide for Sports League Stored Procedures (WIP)
+## User's Guide for Sports League Stored Procedures
 
 #### Procedure Q1: spPlayersInsert
 
@@ -51,7 +46,7 @@ Add error checking to functions and add the expected error codes to this user gu
 #### Procedure Q3: spPlayersSelectAll, spRostersSelectAll, spTeamsSelectAll (Cursor Version)
 
 - **Purpose**: Returns a cursor with all records from the respective tables.
-- **Input Parameters**: `p_cursor` (OUT, SYS_REFCURSOR): Output cursor containing table records.
+- **Input Parameters**: None.
 - **Expected Output**: Cursor with all records.
 - **Potential Errors**:
   - 'Unable to retrieve player data.'
