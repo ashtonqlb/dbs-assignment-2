@@ -37,7 +37,10 @@ Add error checking to functions and add the expected error codes to this user gu
 - **Purpose**: Outputs all records from the respective tables (PLAYERS, ROSTERS, TEAMS) using `DBMS_OUTPUT`.
 - **Input Parameters**: None.
 - **Expected Output**: All records from the respective table displayed in the script window.
-- **Error Codes**: None.
+- **Potential Errors**:
+  - 'Unable to retrieve player data.'
+  - 'Unable to retrieve roster data.'
+  - 'Unable to retrieve team data.'
 - **Example**:
   ```sql
   BEGIN
@@ -50,7 +53,10 @@ Add error checking to functions and add the expected error codes to this user gu
 - **Purpose**: Returns a cursor with all records from the respective tables.
 - **Input Parameters**: `p_cursor` (OUT, SYS_REFCURSOR): Output cursor containing table records.
 - **Expected Output**: Cursor with all records.
-- **Error Codes**: None.
+- **Potential Errors**:
+  - 'Unable to retrieve player data.'
+  - 'Unable to retrieve roster data.'
+  - 'Unable to retrieve team data.'
 - **Example**:
   ```sql
   DECLARE
@@ -67,9 +73,8 @@ Add error checking to functions and add the expected error codes to this user gu
 - **Purpose**: Creates a view combining players, rosters, and teams data.
 - **Input Parameters**: None (View creation).
 - **Expected Output**: A new view `vwPlayerRosters` is created.
-- **Error Codes**: None.
 
-#### Procedure Q5: spteamrosterbyid
+#### Procedure Q5: spTeamRosterByID
 
 - **Purpose**: Displays the team roster for a specified team ID.
 - **Input Parameters**: `v_teamid` (NUMBER): Team ID to query.
@@ -103,7 +108,6 @@ Add error checking to functions and add the expected error codes to this user gu
 - **Purpose**: Creates a view that lists teams along with the number of active players.
 - **Input Parameters**: None (View creation).
 - **Expected Output**: A new view `vwTeamsNumPlayers` is created.
-- **Error Codes**: None.
 
 #### Function Q8: fncNumPlayersByTeamID
 
@@ -129,14 +133,17 @@ END;
 - **Purpose**: Creates a view for game schedules.
 - **Input Parameters**: None (View creation).
 - **Expected Output**: A new view `vwSchedule` is created.
-- **Error Codes**: None.
 
 #### Procedure Q10: spSchedUpcomingGames
 
 - **Purpose**: Retrieves and displays upcoming games within 'n' days.
 - **Input Parameters**: `n` (INTEGER): Number of days ahead to retrieve games.
 - **Expected Output**: Information about upcoming games.
-- **Error Codes**: None.
+- **Potential Errors**:
+  - 'Error: Invalid number of days.'
+    - Solution: Must pass a valid integer.
+  - 'Error: Unable to retrieve upcoming games.'
+    - Generic error; double-check command.
 - **Example**:
 
 ```sql
@@ -150,7 +157,11 @@ END;
 - **Purpose**: Displays games played in the past 'n' days.
 - **Input Parameters**: `n` (NUMBER): Number of past days to query.
 - **Expected Output**: Game records from the past 'n' days.
-- **Error Codes**: None.
+- **Potential Errors**:
+  - 'Error: Invalid number of days.'
+    - Solution: Must pass a valid integer.
+  - 'Error: Unable to retrieve upcoming games.'
+    - Generic error; double-check command.
 - **Example**:
   ```sql
   BEGIN
@@ -182,3 +193,18 @@ END;
 ```sql
 SELECT * FROM tempStandings
 ```
+
+#### Procedure Q14: spGetAllStars
+
+- **Purpose**: Identifies and displays the all-star lineup of players with the most goals for their team in the current season.
+- **Input Parameters**: None.
+- **Expected Output**: A list of all-star players, with each player's team name, player name, and total goals scored in the season.
+- **Potential Errors**:
+  - 'Error: Unable to retrieve all star players.'
+    - Generic error messages; double-check command.
+- **Example**:
+  ```sql
+  BEGIN
+    spGetAllStars;
+  END;
+  ```
