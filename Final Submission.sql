@@ -222,6 +222,9 @@ BEGIN
     ) LOOP
         dbms_output.put_line(i.playerid || ' ' || i.regnumber || ' ' || i.lastname || ' ' || i.firstname || ' ' || i.isactive);
     END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve player data.');
 END;
 /
 
@@ -238,6 +241,9 @@ BEGIN
     ) LOOP
         dbms_output.put_line(i.rosterid || ' ' || i.playerid|| ' ' || i.teamid|| ' ' || i.isactive|| ' ' || i.jerseynumber);
     END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve roster data.');
 END;
 /
 
@@ -254,6 +260,9 @@ BEGIN
     ) LOOP
         dbms_output.put_line(i.teamid || ' ' || i.teamname || ' ' || i.isactive || ' ' || i.jerseycolour);
     END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve team data.');
 END;
 /
 
@@ -274,6 +283,9 @@ BEGIN
             *
         FROM
             players;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve player data.');
 END;
 /
 
@@ -286,6 +298,9 @@ BEGIN
             *
         FROM
             rosters;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve roster data.');
 END;
 /
 
@@ -298,6 +313,9 @@ BEGIN
             *
         FROM
             teams;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve team data.');
 END;
 /
 
@@ -385,7 +403,7 @@ CREATE OR REPLACE VIEW vwPlayerRosters AS
         ON r.teamid = t.teamid;
 
 -- Q5
-CREATE OR REPLACE PROCEDURE spteamrosterbyid (
+CREATE OR REPLACE PROCEDURE spTeamRosterByID (
     v_teamid IN NUMBER
 ) AS
 BEGIN
@@ -393,13 +411,16 @@ BEGIN
         SELECT
             *
         FROM
-            vwplayerrosters
+            vwPlayerRosters
         WHERE
             teamid = v_teamid
     ) LOOP
  -- Perhaps adjust this later; some columns may not be needed
         dbms_output.put_line( i.playerid || ' ' || i.regnumber || ' ' || i.lastname || ' ' || i.firstname || ' ' || i.isactive || ' ' || i.rosterid || ' ' || i.teamid || ' ' || i.jerseynumber || ' ' || i.teamname || ' ' || i.jerseycolour);
     END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve team roster.');
 END;
 /
 
@@ -435,33 +456,26 @@ CREATE OR REPLACE PROCEDURE spTeamRosterByName (
 ) AS
     v_result_quantity INTEGER := 0;
     CURSOR cTeamRoster IS
-        SELECT
-            playerid,
-            regnumber,
-            lastname,
-            firstname,
-            isactive,
-            rosterid,
-            teamid,
-            jerseynumber,
-            teamname,
-            jerseycolour
-        FROM
-            vwPlayerRosters
-        WHERE
-            LOWER(teamname) LIKE LOWER('%' || p_team_name || '%');
+    SELECT
+        playerid,
+        regnumber,
+        lastname,
+        firstname,
+        isactive,
+        rosterid,
+        teamid,
+        jerseynumber,
+        teamname,
+        jerseycolour
+    FROM
+        vwPlayerRosters
+    WHERE
+        LOWER(teamname) LIKE LOWER('%' || p_team_name || '%');
 BEGIN
     FOR roster_record IN cTeamRoster LOOP
         v_result_quantity := v_result_quantity + 1; -- Increment the counter
-        DBMS_OUTPUT.PUT_LINE
-        (
-            'Result ' || TO_CHAR(v_result_quantity) || CHR(10) 
-            || 'Name: ' || roster_record.firstname || ' ' || roster_record.lastname || CHR(10)
-            || 'Jersey Number: ' || roster_record.jerseynumber || CHR(10)
-            || 'Team: ' || roster_record.teamname || CHR(10)
-        );
+        DBMS_OUTPUT.PUT_LINE ( 'Result ' || TO_CHAR(v_result_quantity) || CHR(10) || 'Name: ' || roster_record.firstname || ' ' || roster_record.lastname || CHR(10) || 'Jersey Number: ' || roster_record.jerseynumber || CHR(10) || 'Team: ' || roster_record.teamname || CHR(10) );
     END LOOP;
-
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         p_error_code := 1;
@@ -531,9 +545,9 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        RETURN -1;
+        RETURN -1; -- No team found with the given ID
     WHEN OTHERS THEN
-        RETURN -4;
+        RETURN -4; -- Unexpected error
 END;
 /
 
@@ -601,7 +615,10 @@ BEGIN
 
     CLOSE cUpcomingGames;
 EXCEPTION
+    WHEN INVALID_NUMBER THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid number of days.');
     WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Unable to retrieve upcoming games.');
         IF cUpcomingGames%ISOPEN THEN
             CLOSE cUpcomingGames;
         END IF;
@@ -625,6 +642,11 @@ BEGIN
     ) LOOP
         dbms_output.put_line(i.gameid || ' ' || i.divid || ' ' || i.gamenum || ' ' || i.gamedatetime || ' ' || i.hometeam || ' ' || i.homescore|| ' ' || i.visitteam || ' ' || i.visitscore || ' ' || i.locationid || ' ' || i.isplayed || ' ' || i.notes);
     END LOOP;
+EXCEPTION
+    WHEN INVALID_NUMBER THEN
+        dbms_output.put_line('Error: Invalid number of days.');
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve past games.');
 END;
 /
 
@@ -767,20 +789,70 @@ END;
 /
 
 --Q14
-
+-- Outputs the all-star lineup of players who scored the most goals for their team this season
+CREATE OR REPLACE PROCEDURE spGetAllStars IS
+BEGIN
+    dbms_output.put_line('*** Your All-Star Lineup Is... ***');
+    FOR rec IN (
+        SELECT
+            t.teamName,
+            p.firstName || ' ' || p.lastName AS playerName,
+            COUNT(g.playerId)                AS goals
+        FROM
+            players     p
+            JOIN rosters ro
+            ON p.playerId = ro.playerId JOIN teams t
+            ON ro.teamId = t.teamId
+            JOIN goalscorers g
+            ON p.playerId = g.playerId
+        WHERE
+            ro.isActive = 1
+        GROUP BY
+            t.teamId,
+            t.teamName,
+            p.firstName,
+            p.lastName
+        HAVING
+            COUNT(g.playerId) = (
+                SELECT
+                    MAX(goalsCount)
+                FROM
+                    (
+                        SELECT
+                            COUNT(g2.playerId) AS goalsCount
+                        FROM
+                            goalscorers g2
+                            JOIN rosters ro2
+                            ON g2.playerId = ro2.playerId
+                        WHERE
+                            ro2.teamId = t.teamId
+                            AND ro2.isActive = 1
+                        GROUP BY
+                            g2.playerId
+                    )
+            )
+        ORDER BY
+            t.teamName
+    ) LOOP
+        dbms_output.put_line(trim(rec.teamName) || ': ' || trim(rec.playerName) || ' with ' || trim(rec.goals) || ' goals this season!');
+    END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        dbms_output.put_line('Error: Unable to retrieve all star players.');
+END spGetAllStars;
+/
 
 -- Sample execution code
 
 -- Q1
 DECLARE
     v_reg_number VARCHAR2(50);
-    v_last_name VARCHAR2(50);
+    v_last_name  VARCHAR2(50);
     v_first_name VARCHAR2(50);
-    v_is_active INTEGER;
+    v_is_active  INTEGER;
     v_error_code INTEGER;
 BEGIN
     spPlayersSelect(101, v_reg_number, v_last_name, v_first_name, v_is_active, v_error_code);
-
     IF v_error_code = 0 THEN
         DBMS_OUTPUT.PUT_LINE('Reg#: ' || v_reg_number || ', Last Name: ' || v_last_name || ', First Name: ' || v_first_name || ', Active: ' || v_is_active);
     ELSE
@@ -792,30 +864,35 @@ EXCEPTION
 END;
 /
 
-
 BEGIN
-    spteamrosterbyid(210);   -- Q?
+    spteamrosterbyid(210); -- Q?
     spSchedUpcomingGames(7); -- Q?
-    spSchedPastGames(30);    -- Q?
+    spSchedPastGames(30); -- Q?
 END;
 /
 
-    SELECT
-        *
-    FROM
-        vwTeamsNumPlayers;
-    SELECT
-        fncNumPlayersByTeamID(216)
-    FROM
-        DUAL;
-    SELECT
-        *
-    FROM
-        vwSchedule;
+SELECT
+    *
+FROM
+    vwTeamsNumPlayers;
+
+SELECT
+    fncNumPlayersByTeamID(216)
+FROM
+    DUAL;
+
+SELECT
+    *
+FROM
+    vwSchedule;
 
 DECLARE
     error integer;
-BEGIN 
+BEGIN
     spTeamRosterByName('Aurora', error);
 END;
 /
+
+BEGIN
+    spGetAllStars;
+END;
