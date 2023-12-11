@@ -1065,7 +1065,7 @@ END spGetAllStars;
 
 ---------------------------------------------                                             -----------------------------------------------
 ---------------------------------------------            SAMPLE EXECUTION CODE            -----------------------------------------------
----------------------------------------------             (it works just okay)             -----------------------------------------------
+---------------------------------------------             (it works just okay)            -----------------------------------------------
 -- Q1
 -- Seeing how beefy Q1 is and how much of the logic is reused, I simply provided the first table's worth of execution code. It's almost exactly the same between all three - AL
 DECLARE
